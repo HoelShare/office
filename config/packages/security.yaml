@@ -9,11 +9,8 @@ security:
       pattern: ^/login
       stateless: true
       context: my_context
-      provider: my_ldap
-      json_login_ldap:
-        check_path: /login
-        service: Symfony\Component\Ldap\Ldap
-        dn_string: "%env(resolve:LDAP_LOGIN_DN)"
+      custom_authenticators:
+        - App\Security\LdapAuthenticator
 
     main:
       pattern: ^/api
@@ -29,15 +26,3 @@ security:
 
     # but require authentication for all other admin routes
     - { path: ^/admin, roles: ROLE_ADMIN }
-
-
-  providers:
-    my_ldap:
-      ldap:
-        service: Symfony\Component\Ldap\Ldap
-        base_dn: '%env(resolve:LDAP_BASE_DN)%'
-        search_dn: '%env(resolve:LDAP_SEARCH_DN)%'
-        search_password: '%env(resolve:LDAP_SEARCH_PASS)%'
-        default_roles: ROLE_USER
-        uid_key: uid
-        extra_fields: ['email']

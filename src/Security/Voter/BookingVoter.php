@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace App\Security\Voter;
 
+use App\Entity\Booking;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Security;
-use function in_array;
 
-class UserVoter extends Voter
+class BookingVoter extends Voter
 {
     public function __construct(
         private Security $authorizationChecker,
@@ -18,26 +18,22 @@ class UserVoter extends Voter
 
     protected function supports(string $attribute, $subject): bool
     {
-        return $subject instanceof User;
+        return $subject instanceof Booking;
     }
 
     /**
-     * @param User $subject
+     * @param Booking $subject
      */
-    protected function voteOnAttribute(string $attribute, $subject, TokenInterface $token)
+    protected function voteOnAttribute(string $attribute, $subject, TokenInterface $token): bool
     {
-        if (in_array($attribute,
-            [
-                VoterAttributes::VOTE_CREATE,
-                VoterAttributes::VOTE_UPDATE,
-                VoterAttributes::VOTE_DELETE,
-            ], true)) {
-            return false;
+        if ($attribute === VoterAttributes::VOTE_READ) {
+            return true;
         }
 
+        /** @var User $authedUser */
         $authedUser = $token->getUser();
 
-        return $subject->getUsername() === $authedUser->getUsername()
+        return $subject->getUserId() === $authedUser->getId()
             || $this->authorizationChecker->isGranted('ROLE_ADMIN');
     }
 }

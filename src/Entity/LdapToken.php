@@ -5,11 +5,12 @@ namespace App\Entity;
 
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 /**
  * @ORM\Entity()
  */
-class LdapToken
+class LdapToken implements JsonSerializable
 {
     /**
      * @ORM\Id
@@ -24,9 +25,9 @@ class LdapToken
     private string $token;
 
     /**
-     * @ORM\Column(type="datetime_immutable")
+     * @ORM\Column(type="datetime_immutable", nullable=true)
      */
-    private DateTimeImmutable $expire;
+    private ?DateTimeImmutable $expire;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="ldapTokens")
@@ -56,7 +57,7 @@ class LdapToken
         return $this->expire;
     }
 
-    public function setExpire(DateTimeImmutable $expire): self
+    public function setExpire(?DateTimeImmutable $expire): self
     {
         $this->expire = $expire;
 
@@ -73,5 +74,10 @@ class LdapToken
         $this->user = $user;
 
         return $this;
+    }
+
+    public function jsonSerialize()
+    {
+        return get_object_vars($this);
     }
 }

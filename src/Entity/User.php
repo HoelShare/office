@@ -22,29 +22,24 @@ class User implements UserInterface, JsonSerializable
     private int $id;
 
     /**
-     * @ORM\Column(type="integer", unique=true)
+     * @ORM\Column(unique=true)
      */
-    private int $ldapId;
+    private string $ldapId;
 
     /**
-     * @ORM\Column()
+     * @ORM\Column(nullable=true)
      */
-    private string $email;
+    private ?string $email;
 
     /**
-     * @ORM\Column()
+     * @ORM\Column(nullable=true)
      */
-    private string $name;
+    private ?string $name;
 
     /**
-     * @ORM\Column()
+     * @ORM\Column(nullable=true)
      */
-    private string $fullName;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private bool $active;
+    private ?string $fullName;
 
     /**
      * @ORM\Column(type="json")
@@ -52,13 +47,24 @@ class User implements UserInterface, JsonSerializable
     private array $roles;
 
     /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private ?string $image;
+
+    /**
      * @ORM\OneToMany(targetEntity=LdapToken::class, mappedBy="user", orphanRemoval=true)
      */
     private Collection $ldapTokens;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Booking::class, mappedBy="user", orphanRemoval=true)
+     */
+    private Collection $bookings;
+
     public function __construct()
     {
         $this->ldapTokens = new ArrayCollection();
+        $this->bookings = new ArrayCollection();
     }
 
     public function getSalt()
@@ -80,64 +86,54 @@ class User implements UserInterface, JsonSerializable
         return get_object_vars($this);
     }
 
-    public function getId(): string
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function setId(string $id): void
+    public function setId(int $id): void
     {
         $this->id = $id;
     }
 
-    public function getLdapId(): int
+    public function getLdapId(): string
     {
         return $this->ldapId;
     }
 
-    public function setLdapId(int $ldapId): void
+    public function setLdapId(string $ldapId): void
     {
         $this->ldapId = $ldapId;
     }
 
-    public function getEmail(): string
+    public function getEmail(): ?string
     {
         return $this->email;
     }
 
-    public function setEmail(string $email): void
+    public function setEmail(?string $email): void
     {
         $this->email = $email;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function setName(string $name): void
+    public function setName(?string $name): void
     {
         $this->name = $name;
     }
 
-    public function getFullName(): string
+    public function getFullName(): ?string
     {
         return $this->fullName;
     }
 
-    public function setFullName(string $fullName): void
+    public function setFullName(?string $fullName): void
     {
         $this->fullName = $fullName;
-    }
-
-    public function isActive(): bool
-    {
-        return $this->active;
-    }
-
-    public function setActive(bool $active): void
-    {
-        $this->active = $active;
     }
 
     public function getRoles(): array
@@ -182,6 +178,54 @@ class User implements UserInterface, JsonSerializable
             // set the owning side to null (unless already changed)
             if ($ldapToken->getUser() === $this) {
                 $ldapToken->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getImage(): string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): void
+    {
+        if ($image) {
+            $image = base64_encode($image);
+        }
+        $this->image = $image;
+    }
+
+    /**
+     * @return Collection|Booking[]
+     */
+    public function getBookings(): Collection
+    {
+        return $this->bookings;
+    }
+
+    public function setBookings(Collection $bookings): void
+    {
+        $this->bookings = $bookings;
+    }
+
+    public function addBooking(Booking $booking): self
+    {
+        if (!$this->bookings->contains($booking)) {
+            $this->bookings[] = $booking;
+            $booking->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBooking(Booking $booking): self
+    {
+        if ($this->bookings->removeElement($booking)) {
+            // set the owning side to null (unless already changed)
+            if ($booking->getUser() === $this) {
+                $booking->setUser(null);
             }
         }
 

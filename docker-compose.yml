@@ -17,13 +17,18 @@ services:
     - 8025:8025
 
   app:
+    container_name: office_app
     image: webdevops/php-apache:8.0
     environment:
       WEB_DOCUMENT_ROOT: /app/public
     links:
       - mail:mail
       - database:mysql
+      - ldap:ldap
     volumes:
     - .:/app
     ports:
     - 8090:80
+
+  ldap:
+    image: rroemhild/test-openldap

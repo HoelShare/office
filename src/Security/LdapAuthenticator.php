@@ -3,56 +3,66 @@ declare(strict_types=1);
 
 namespace App\Security;
 
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\User;
+use App\Ldap\LdapService;
+use App\User\UserService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
-class TokenAuthenticator extends AbstractAuthenticator
+class LdapAuthenticator extends AbstractAuthenticator
 {
-    public function __construct(private EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        private LdapService $ldapService,
+        private UserService $userService,
+    ) {
     }
 
     public function supports(Request $request): ?bool
     {
-        return $request->headers->has('auth-token');
+        return true;
     }
 
     public function authenticate(Request $request): PassportInterface
     {
-        $apiToken = $request->headers->get('auth-token');
-        if ($apiToken === null) {
-            // The token header was empty, authentication fails with HTTP Status
-            // Code 401 "Unauthorized"
-            throw new CustomUserMessageAuthenticationException('No API token provided');
-        }
+        $username = $request->get('username');
+        $password = $request->get('password');
 
-        $user = $this->entityManager->createQuery(
-            'SELECT u
-            FROM App\Entity\User u
-            INNER JOIN u.ldapTokens t
-            WHERE t.token = :apiToken'
-        )->setParameter('apiToken', $apiToken)
-            ->getOneOrNullResult();
-
-        if ($user === null) {
+        if ($username === null || $password === null) {
             throw new UsernameNotFoundException();
         }
+
+        $user = $this->ldapService->updateUser($username, $password);
+
+        if (null === $user) {
+            throw new UsernameNotFoundException();
+        }
+
+        $this->userService->addToken($user);
 
         return new SelfValidatingPassport($user);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        return null;
+        $authToken = null;
+        $user = $token->getUser();
+        if ($user instanceof User && $user->getLdapTokens()->last() !== null) {
+            $authToken = $user->getLdapTokens()->last()->getToken();
+        }
+
+        $data = [
+            'auth_token' => $authToken,
+            'user' => $user,
+        ];
+
+        return new JsonResponse($data);
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response

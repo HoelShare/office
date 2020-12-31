@@ -17,4 +17,12 @@ class AuthController extends AbstractController
     {
         dd($this->getUser());
     }
+
+    /**
+     * @Route(path="/api/user/me", name="me", methods={"GET"})
+     */
+    public function meAction(): JsonResponse
+    {
+        return new JsonResponse(['user' => $this->getUser()]);
+    }
 }

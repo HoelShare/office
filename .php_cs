@@ -7,6 +7,7 @@ $finder = PhpCsFixer\Finder::create()
 
 return (new PhpCsFixer\Config())
     ->setRules([
+        '@PSR2' => true,
         '@Symfony' => true,
 
         // Fix declare style
