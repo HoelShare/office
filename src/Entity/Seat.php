@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity()
@@ -34,6 +35,13 @@ class Seat implements JsonSerializable
      * @ORM\Column(type="float")
      */
     private float $locationY;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Floor::class, inversedBy="seats")
+     * @ORM\JoinColumn(nullable=false, fieldName="buildingId")
+     * @Assert\NotBlank()
+     */
+    private ?Floor $floor;
 
     /**
      * @ORM\OneToMany(targetEntity=SeatResource::class, mappedBy="seats")
@@ -131,6 +139,16 @@ class Seat implements JsonSerializable
         }
 
         return $this;
+    }
+
+    public function getFloor(): ?Floor
+    {
+        return $this->floor;
+    }
+
+    public function setFloor(?Floor $floor): void
+    {
+        $this->floor = $floor;
     }
 
     public function jsonSerialize()

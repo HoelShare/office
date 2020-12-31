@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -41,6 +42,11 @@ class Floor implements JsonSerializable
      * @Assert\NotBlank
      */
     private ?Building $building;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Seat::class, mappedBy="floor", orphanRemoval=true)
+     */
+    private Collection $seats;
 
     public function getId(): int
     {
@@ -90,6 +96,38 @@ class Floor implements JsonSerializable
     public function setFloorPath(string $floorPath): void
     {
         $this->floorPath = $floorPath;
+    }
+
+    public function getSeats(): Collection
+    {
+        return $this->seats;
+    }
+
+    public function setSeats(Collection $seats): void
+    {
+        $this->$seats = $seats;
+    }
+
+    public function addSeat(Seat $seat): self
+    {
+        if (!$this->seats->contains($seat)) {
+            $this->seats[] = $seat;
+            $seat->setFloor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSeat(Seat $seat): self
+    {
+        if ($this->seats->removeElement($seat)) {
+            // set the owning side to null (unless already changed)
+            if ($seat->getFloor() === $this) {
+                $seat->setFloor(null);
+            }
+        }
+
+        return $this;
     }
 
     public function jsonSerialize()
