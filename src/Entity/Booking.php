@@ -36,7 +36,6 @@ class Booking implements JsonSerializable
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="bookings")
      * @ORM\JoinColumn(nullable=false)
-     * @Assert\NotBlank()
      */
     private ?User $user;
 
@@ -50,14 +49,12 @@ class Booking implements JsonSerializable
     /**
      * @ORM\Column(type="datetime_immutable")
      * @Assert\NotBlank()
-     * @Assert\DateTime()
      */
     private DateTimeImmutable $fromDay;
 
     /**
      * @ORM\Column(type="datetime_immutable")
      * @Assert\NotBlank()
-     * @Assert\DateTime()
      */
     private DateTimeImmutable $untilDay;
 
@@ -67,11 +64,16 @@ class Booking implements JsonSerializable
     private DateTimeImmutable $createdAt;
 
     /**
-     * @ORM\Column
+     * @ORM\Column(type="enumbooking")
      * @Assert\NotBlank
-     * @TODO: Create enum type -> whole day, morning, afternoon
      */
     private string $type;
+
+    public function __construct()
+    {
+        $this->user = null;
+        $this->seat = null;
+    }
 
     public function getId(): int
     {

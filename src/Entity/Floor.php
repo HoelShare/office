@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
@@ -48,6 +49,11 @@ class Floor implements JsonSerializable
      * @ORM\OneToMany(targetEntity=Seat::class, mappedBy="floor", orphanRemoval=true)
      */
     private Collection $seats;
+
+    public function __construct()
+    {
+        $this->seats = new ArrayCollection();
+    }
 
     public function getId(): int
     {

@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Repository\CriteriaBuilder\CriteriaBuilder;
+use App\Repository\Event\UpdateEvent;
+use App\Repository\Event\WriteEvent;
 use App\Repository\Exception\NotAllowedException;
 use App\Repository\Exception\ValidationException;
 use App\Request\RepositoryContext;
@@ -13,6 +15,7 @@ use Doctrine\ORM\QueryBuilder;
 use Exception;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class EntityRepository
 {
@@ -23,6 +26,7 @@ class EntityRepository
         private ValidatorInterface $validator,
         private EntityClassFinder $classFinder,
         private EntityAssigner $entityAssigner,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -84,6 +88,8 @@ class EntityRepository
             throw new ValidationException($validations);
         }
 
+        $this->eventDispatcher->dispatch(new WriteEvent($class, $object, $data));
+
         $this->entityManager->persist($object);
         $this->entityManager->flush();
     }
@@ -103,6 +109,8 @@ class EntityRepository
             ->isGranted(VoterAttributes::VOTE_UPDATE, $entity)) {
             throw new Exception('Not Allowed');
         }
+
+        $this->eventDispatcher->dispatch(new UpdateEvent($object::class, $object, $data));
 
         $this->entityManager->persist($object);
         $this->entityManager->flush();

@@ -5,6 +5,7 @@ namespace App\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
 use ReflectionClass;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class EntityAssigner
 {
@@ -28,12 +29,12 @@ class EntityAssigner
             }
 
             if (method_exists($object, $setterName)) {
-                $object->$setterName($value);
+                $this->setValue($setterName, $object, $value);
             }
         }
     }
 
-    private function isFkField(int | string $key): bool
+    private function isFkField(int|string $key): bool
     {
         return str_ends_with($key, 'Id');
     }
@@ -44,11 +45,8 @@ class EntityAssigner
         $refectionClass = new ReflectionClass($object);
         $property = $refectionClass->getProperty($propertyName);
 
-        $class = (string) $property->getType();
-
-        if ($this->isNullableType($class)) {
-            $class = $this->removeNullable($class);
-        }
+        $class = (string)$property->getType();
+        $class = $this->removeNullable($class);
 
         $value = $this->entityManager->getReference($class, $value);
 
@@ -62,8 +60,46 @@ class EntityAssigner
 
     private function removeNullable(string $class): string
     {
-        $class = mb_substr($class, 1);
+        if ($this->isNullableType($class)) {
+            $class = mb_substr($class, 1);
+        }
 
         return $class;
+    }
+
+    private function setValue(string $methodName, $object, mixed $value): void
+    {
+        $method = new \ReflectionMethod($object, $methodName);
+        if ($method->getNumberOfRequiredParameters() !== 1) {
+            throw new BadRequestHttpException();
+        }
+
+        $parameterClass = $this->removeNullable((string)$method->getParameters()[0]->getType());
+
+        if (is_a($value, $parameterClass, true)) {
+            $object->$methodName($value);
+            return;
+        }
+
+        switch ($parameterClass) {
+            case 'string':
+            case 'int':
+                break;
+            case \DateTimeImmutable::class:
+                $originalValue = $value;
+                $value = \DateTimeImmutable::createFromFormat(DATE_ATOM, $value);
+                if ($value === false) {
+                    throw new BadRequestHttpException(
+                        sprintf('%s not in Format %s', $originalValue, DATE_ATOM)
+                    );
+                }
+                break;
+            default:
+                throw new BadRequestHttpException(
+                    sprintf('Unsupported Class %s for method %s on %s', $parameterClass, $methodName, $object::class)
+                );
+        }
+
+        $object->$methodName($value);
     }
 }
