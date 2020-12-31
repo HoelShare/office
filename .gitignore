@@ -16,4 +16,5 @@ vendor/
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
 
+/images/
 *.cache

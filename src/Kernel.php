@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DriverManager;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
@@ -14,25 +12,6 @@ use function dirname;
 class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
-
-    private static ?Connection $connection = null;
-
-    public static function getConnection(): Connection
-    {
-        if (!self::$connection) {
-            $url = $_ENV['DATABASE_URL']
-                ?? $_SERVER['DATABASE_URL']
-                ?? getenv('DATABASE_URL');
-            $parameters = [
-                'url' => $url,
-                'charset' => 'utf8mb4',
-            ];
-
-            self::$connection = DriverManager::getConnection($parameters);
-        }
-
-        return self::$connection;
-    }
 
     protected function configureContainer(ContainerConfigurator $container): void
     {
