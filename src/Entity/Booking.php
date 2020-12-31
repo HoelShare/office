@@ -6,9 +6,11 @@ namespace App\Entity;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity()
+ * @ORM\HasLifecycleCallbacks()
  */
 class Booking implements JsonSerializable
 {
@@ -34,22 +36,28 @@ class Booking implements JsonSerializable
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="bookings")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotBlank()
      */
     private ?User $user;
 
     /**
      * @ORM\ManyToOne(targetEntity=Seat::class, inversedBy="bookings")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotBlank
      */
     private ?Seat $seat;
 
     /**
      * @ORM\Column(type="datetime_immutable")
+     * @Assert\NotBlank()
+     * @Assert\DateTime()
      */
     private DateTimeImmutable $fromDay;
 
     /**
      * @ORM\Column(type="datetime_immutable")
+     * @Assert\NotBlank()
+     * @Assert\DateTime()
      */
     private DateTimeImmutable $untilDay;
 
@@ -60,6 +68,7 @@ class Booking implements JsonSerializable
 
     /**
      * @ORM\Column
+     * @Assert\NotBlank
      * @TODO: Create enum type -> whole day, morning, afternoon
      */
     private string $type;
@@ -152,5 +161,13 @@ class Booking implements JsonSerializable
     public function setSeatId(int $seatId): void
     {
         $this->seatId = $seatId;
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
     }
 }

@@ -5,6 +5,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity()
@@ -22,18 +23,21 @@ class SeatResource implements JsonSerializable
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\NotBlank()
      */
     private int $order;
 
     /**
      * @ORM\ManyToOne(targetEntity=Seat::class, inversedBy="seatResources")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotBlank
      */
     private ?Seat $seat;
 
     /**
      * @ORM\ManyToOne(targetEntity=Resource::class, inversedBy="seatResource")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotBlank
      */
     private ?Resource $resource;
 

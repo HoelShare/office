@@ -29,11 +29,17 @@ class EntityCriteriaBuilder implements CriteriaBuilder
         }
     }
 
-    private function map(string $field, array $value, QueryBuilder $queryBuilder): Comparison
+    private function map(string $field, array $data, QueryBuilder $queryBuilder): Comparison
     {
-        return match($value['type']) {
-            FilterTypes::EQUALS => $queryBuilder->expr()->eq($field, $queryBuilder->expr()->literal($value['value'])),
-            FilterTypes::NOT_EQUALS => $queryBuilder->expr()->neq($field, $queryBuilder->expr()->literal($value['value'])),
+        $value = $queryBuilder->expr()->literal($data['value']);
+        $type = $data['type'];
+        return match ($type) {
+            FilterTypes::EQUALS,
+            FilterTypes::NOT_EQUALS,
+            FilterTypes::GREATER_THAN_EQUALS,
+            FilterTypes::GREATER_THAN,
+            FilterTypes::LESS_THAN_EQUALS,
+            FilterTypes::LESS_THAN => $queryBuilder->expr()->$type($field, $value),
             default => throw new BadRequestHttpException(),
         };
     }

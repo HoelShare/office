@@ -6,6 +6,7 @@ namespace App\Request;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\User\UserInterface;
+use function in_array;
 use function is_array;
 
 class ContextFactory
@@ -45,9 +46,9 @@ class ContextFactory
             }
 
             if (is_array($condition)) {
-                $mapped[$key] = $this->mapCondition($condition);
+                $mapped[$key] = $this->validateCondition($condition);
             } else {
-                $mapped[$key] = $this->mapCondition([
+                $mapped[$key] = $this->validateCondition([
                     'type' => FilterTypes::EQUALS,
                     'value' => $condition,
                 ]);
@@ -57,9 +58,20 @@ class ContextFactory
         return $mapped;
     }
 
-    private function mapCondition(array $condition): array
+    private function validateCondition(array $condition): array
     {
         if (!isset($condition['type'], $condition['value'])) {
+            throw new BadRequestHttpException();
+        }
+
+        if (!in_array($condition['type'], [
+            FilterTypes::EQUALS,
+            FilterTypes::NOT_EQUALS,
+            FilterTypes::GREATER_THAN,
+            FilterTypes::GREATER_THAN_EQUALS,
+            FilterTypes::LESS_THAN,
+            FilterTypes::LESS_THAN_EQUALS,
+        ], true)) {
             throw new BadRequestHttpException();
         }
 

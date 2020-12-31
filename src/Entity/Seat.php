@@ -25,21 +25,28 @@ class Seat implements JsonSerializable
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\NotBlank()
      */
     private int $number;
 
     /**
      * @ORM\Column(type="float")
+     * @Assert\NotBlank
+     * @Assert\Type(type="float")
      */
     private float $locationX;
 
     /**
      * @ORM\Column(type="float")
+     * @Assert\NotBlank
+     * @Assert\Type(type="float")
      */
     private float $locationY;
 
     /**
      * @ORM\Column(type="integer", nullable=false)
+     * @Assert\Type(type="integer")
+     * @Assert\NotBlank
      */
     private int $floorId;
 

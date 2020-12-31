@@ -6,6 +6,7 @@ namespace App\Entity;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity()
@@ -23,6 +24,7 @@ class LdapToken implements JsonSerializable
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
      */
     private string $token;
 
@@ -34,6 +36,7 @@ class LdapToken implements JsonSerializable
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="ldapTokens")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotBlank
      */
     private ?User $user;
 
