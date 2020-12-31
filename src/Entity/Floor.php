@@ -13,6 +13,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Floor implements JsonSerializable
 {
+    use EntitySerializableTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -31,10 +33,9 @@ class Floor implements JsonSerializable
     private ?int $number;
 
     /**
-     * @ORM\Column
-     * @Assert\NotBlank()
+     * @ORM\Column(nullable=true)
      */
-    private string $floorPath;
+    private ?string $floorPath;
 
     /**
      * @ORM\ManyToOne(targetEntity=Building::class, inversedBy="floors")
@@ -88,12 +89,12 @@ class Floor implements JsonSerializable
         $this->building = $building;
     }
 
-    public function getFloorPath(): string
+    public function getFloorPath(): ?string
     {
         return $this->floorPath;
     }
 
-    public function setFloorPath(string $floorPath): void
+    public function setFloorPath(?string $floorPath): void
     {
         $this->floorPath = $floorPath;
     }
@@ -128,10 +129,5 @@ class Floor implements JsonSerializable
         }
 
         return $this;
-    }
-
-    public function jsonSerialize()
-    {
-        return get_object_vars($this);
     }
 }

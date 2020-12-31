@@ -12,6 +12,8 @@ use JsonSerializable;
  */
 class Booking implements JsonSerializable
 {
+    use EntitySerializableTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -150,10 +152,5 @@ class Booking implements JsonSerializable
     public function setSeatId(int $seatId): void
     {
         $this->seatId = $seatId;
-    }
-
-    public function jsonSerialize()
-    {
-        return get_object_vars($this);
     }
 }

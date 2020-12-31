@@ -14,6 +14,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Resource implements JsonSerializable
 {
+    use EntitySerializableTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -81,14 +83,5 @@ class Resource implements JsonSerializable
     public function setSeatResources(ArrayCollection | Collection $seatResources): void
     {
         $this->seatResources = $seatResources;
-    }
-
-    public function jsonSerialize()
-    {
-        return [
-            'id' => $this->getId(),
-            'type' => $this->getType(),
-            'name' => $this->getName(),
-        ];
     }
 }

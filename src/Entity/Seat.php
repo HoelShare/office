@@ -14,6 +14,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Seat implements JsonSerializable
 {
+    use EntitySerializableTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -37,8 +39,13 @@ class Seat implements JsonSerializable
     private float $locationY;
 
     /**
+     * @ORM\Column(type="integer", nullable=false)
+     */
+    private int $floorId;
+
+    /**
      * @ORM\ManyToOne(targetEntity=Floor::class, inversedBy="seats")
-     * @ORM\JoinColumn(nullable=false, fieldName="buildingId")
+     * @ORM\JoinColumn(nullable=false, fieldName="floorId")
      * @Assert\NotBlank()
      */
     private ?Floor $floor;
@@ -149,10 +156,5 @@ class Seat implements JsonSerializable
     public function setFloor(?Floor $floor): void
     {
         $this->floor = $floor;
-    }
-
-    public function jsonSerialize()
-    {
-        return get_object_vars($this);
     }
 }

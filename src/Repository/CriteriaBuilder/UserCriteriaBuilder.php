@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Repository;
+namespace App\Repository\CriteriaBuilder;
 
 use App\Entity\User;
 use App\Request\RepositoryContext;

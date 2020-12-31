@@ -4,17 +4,65 @@ declare(strict_types=1);
 namespace App\Request;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\User\UserInterface;
+use function is_array;
 
 class ContextFactory
 {
     public function create(Request $request, ?UserInterface $user): RepositoryContext
     {
+        $whereCondition = null;
+        if ($request->get('where') !== null) {
+            $whereCondition = $this->extractCondition($request->get('where'));
+        }
+
         return new RepositoryContext(
             orderBy: $request->get('orderBy'),
             limit: (int) $request->get('limit', 10),
             offset: (int) $request->get('offset', 0),
             user: $user,
+            where: $whereCondition,
         );
+    }
+
+    private function extractCondition(string | array $where): array
+    {
+        if (!is_array($where)) {
+            $where = json_decode($where, true, 512, JSON_THROW_ON_ERROR);
+        }
+
+        return $this->mapConditions($where);
+    }
+
+    private function mapConditions(array $conditions): array
+    {
+        $mapped = [];
+
+        foreach ($conditions as $key => $condition) {
+            if (is_numeric($key)) {
+                throw new BadRequestHttpException();
+            }
+
+            if (is_array($condition)) {
+                $mapped[$key] = $this->mapCondition($condition);
+            } else {
+                $mapped[$key] = $this->mapCondition([
+                    'type' => FilterTypes::EQUALS,
+                    'value' => $condition,
+                ]);
+            }
+        }
+
+        return $mapped;
+    }
+
+    private function mapCondition(array $condition): array
+    {
+        if (!isset($condition['type'], $condition['value'])) {
+            throw new BadRequestHttpException();
+        }
+
+        return $condition;
     }
 }

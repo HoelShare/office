@@ -12,6 +12,8 @@ use JsonSerializable;
  */
 class LdapToken implements JsonSerializable
 {
+    use EntitySerializableTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -74,10 +76,5 @@ class LdapToken implements JsonSerializable
         $this->user = $user;
 
         return $this;
-    }
-
-    public function jsonSerialize()
-    {
-        return get_object_vars($this);
     }
 }

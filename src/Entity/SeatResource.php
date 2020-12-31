@@ -11,6 +11,8 @@ use JsonSerializable;
  */
 class SeatResource implements JsonSerializable
 {
+    use EntitySerializableTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -73,10 +75,5 @@ class SeatResource implements JsonSerializable
     public function setResource($resource): void
     {
         $this->resource = $resource;
-    }
-
-    public function jsonSerialize()
-    {
-        return get_object_vars($this);
     }
 }

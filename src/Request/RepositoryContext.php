@@ -12,6 +12,7 @@ class RepositoryContext
         private ?int $limit = 10,
         private ?int $offset = 0,
         private ?UserInterface $user = null,
+        private ?array $where = null,
     ) {
         if ($this->limit === null) {
             $this->limit = 10;
@@ -39,5 +40,10 @@ class RepositoryContext
     public function getUser(): ?UserInterface
     {
         return $this->user;
+    }
+
+    public function getWhere(): ?array
+    {
+        return $this->where;
     }
 }

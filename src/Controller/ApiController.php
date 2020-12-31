@@ -25,7 +25,7 @@ class ApiController extends AbstractController
     /**
      * @Route(path="/{entity}", name="list", methods={"GET"})
      */
-    public function listAction(Request $request, ContextFactory $contextFactory, string $entity): JsonResponse
+    public function listAction(Request $request, string $entity): JsonResponse
     {
         $context = $this->contextFactory->create($request, $this->getUser());
 

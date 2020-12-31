@@ -14,6 +14,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class User implements UserInterface, JsonSerializable
 {
+    use EntitySerializableTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -79,11 +81,6 @@ class User implements UserInterface, JsonSerializable
 
     public function eraseCredentials(): void
     {
-    }
-
-    public function jsonSerialize()
-    {
-        return get_object_vars($this);
     }
 
     public function getId(): int
