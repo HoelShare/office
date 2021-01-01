@@ -32,7 +32,7 @@ class UserCriteriaBuilder implements CriteriaBuilder
     {
         $user = $context->getUser();
         if (!$user instanceof User) {
-            return;
+            throw new \RuntimeException('No user set');
         }
 
         yield $queryBuilder->expr()->eq('e.id', $user->getId());

@@ -45,7 +45,7 @@ class UserMapper
     private function getField(array $rawData, string $fieldPath, bool $allowArray = false): string | array
     {
         if (!isset($rawData[$fieldPath])) {
-            throw new Exception(sprintf('Field %s not found ', $fieldPath));
+            throw new \RuntimeException(sprintf('Field %s not found', $fieldPath));
         }
 
         $data = $rawData[$fieldPath];

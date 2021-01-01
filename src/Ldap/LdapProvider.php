@@ -25,9 +25,6 @@ class LdapProvider
 
         // connect ldap
         $this->ldapConnection = $this->connect($this->server);
-        if (!$this->ldapConnection) {
-            return false;
-        }
 
         ldap_set_option($this->ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($this->ldapConnection, LDAP_OPT_REFERRALS, 0);

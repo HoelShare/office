@@ -63,12 +63,6 @@ class Booking implements JsonSerializable
      */
     private DateTimeImmutable $createdAt;
 
-    /**
-     * @ORM\Column(type="enumbooking")
-     * @Assert\NotBlank
-     */
-    private string $type;
-
     public function __construct()
     {
         $this->user = null;
@@ -145,16 +139,6 @@ class Booking implements JsonSerializable
         $this->createdAt = $createdAt;
     }
 
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    public function setType(string $type): void
-    {
-        $this->type = $type;
-    }
-
     public function getSeatId(): int
     {
         return $this->seatId;
@@ -170,6 +154,6 @@ class Booking implements JsonSerializable
      */
     public function setCreatedAtValue(): void
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
     }
 }

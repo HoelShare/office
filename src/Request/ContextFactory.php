@@ -18,8 +18,16 @@ class ContextFactory
             $whereCondition = $this->extractCondition($request->get('where'));
         }
 
+        $order = $request->get('orderBy');
+        $direction = 'ASC';
+        if ($order !== null && str_starts_with($order, '-')) {
+            $direction = 'DESC';
+            $order = substr($order, 1);
+        }
+
         return new RepositoryContext(
-            orderBy: $request->get('orderBy'),
+            orderBy: $order,
+            orderDirection: $direction,
             limit: (int) $request->get('limit', 10),
             offset: (int) $request->get('offset', 0),
             user: $user,

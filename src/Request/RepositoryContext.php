@@ -8,7 +8,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class RepositoryContext
 {
     public function __construct(
-        private array | string | null $orderBy = null,
+        private ?string $orderBy = null,
+        private string $orderDirection = 'ASC',
         private ?int $limit = 10,
         private ?int $offset = 0,
         private ?UserInterface $user = null,
@@ -22,9 +23,14 @@ class RepositoryContext
         }
     }
 
-    public function getOrderBy(): array | string | null
+    public function getOrderBy(): ?string
     {
         return $this->orderBy;
+    }
+
+    public function getOrderDirection(): string
+    {
+        return $this->orderDirection;
     }
 
     public function getLimit(): int

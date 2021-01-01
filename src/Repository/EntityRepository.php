@@ -10,9 +10,10 @@ use App\Repository\Exception\NotAllowedException;
 use App\Repository\Exception\ValidationException;
 use App\Request\RepositoryContext;
 use App\Security\Voter\VoterAttributes;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
-use Exception;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -47,7 +48,7 @@ class EntityRepository
 
         if ($result && !$this->authorizationChecker
                 ->isGranted(VoterAttributes::VOTE_READ, $result)) {
-            throw new Exception('Not Allowed');
+            throw new NotAllowedException('Not Allowed');
         }
 
         return $result;
@@ -63,7 +64,7 @@ class EntityRepository
         foreach ($results as $result) {
             if (!$this->authorizationChecker
                 ->isGranted(VoterAttributes::VOTE_READ, $result)) {
-                throw new Exception('Not Allowed');
+                throw new NotAllowedException('Not Allowed');
             }
         }
 
@@ -79,8 +80,8 @@ class EntityRepository
         $this->entityAssigner->assignData($object, $data);
 
         if (!$this->authorizationChecker
-            ->isGranted(VoterAttributes::VOTE_CREATE, $entity)) {
-            throw new Exception('Not Allowed');
+            ->isGranted(VoterAttributes::VOTE_CREATE, $object)) {
+            throw new NotAllowedException('Not Allowed');
         }
 
         $validations = $this->validator->validate($object);
@@ -99,15 +100,15 @@ class EntityRepository
         $object = $this->get($entity, $id, $context);
 
         if (!$object) {
-            throw new Exception('Not Allowed');
+            throw new NotFoundHttpException();
         }
 
         unset($data['id']);
         $this->entityAssigner->assignData($object, $data);
 
         if (!$this->authorizationChecker
-            ->isGranted(VoterAttributes::VOTE_UPDATE, $entity)) {
-            throw new Exception('Not Allowed');
+            ->isGranted(VoterAttributes::VOTE_UPDATE, $object)) {
+            throw new NotAllowedException('Not Allowed');
         }
 
         $this->eventDispatcher->dispatch(new UpdateEvent($object::class, $object, $data));
@@ -120,13 +121,21 @@ class EntityRepository
     {
         $object = $this->get($entity, $id, $context);
 
-        if (!$object || !$this->authorizationChecker
-                ->isGranted(VoterAttributes::VOTE_DELETE, $entity)) {
+        if (!$object) {
+            throw new NotFoundHttpException();
+        }
+
+        if (!$this->authorizationChecker
+                ->isGranted(VoterAttributes::VOTE_DELETE, $object)) {
             throw new NotAllowedException();
         }
 
-        $this->entityManager->remove($object);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->remove($object);
+            $this->entityManager->flush();
+        } catch (ForeignKeyConstraintViolationException $e) {
+            throw new NotAllowedException();
+        }
     }
 
     private function buildQuery(string $class, RepositoryContext $context): QueryBuilder
@@ -139,8 +148,13 @@ class EntityRepository
         }
 
         $queryBuilder->select(CriteriaBuilder::SELECT_ALIAS);
-        if ($context->getOrderBy()) {
-            $queryBuilder->addOrderBy($context->getOrderBy());
+        if ($context->getOrderBy() !== null) {
+            $order = $context->getOrderBy();
+            if (!str_contains($order, '.')) {
+                $order = sprintf('%s.%s', CriteriaBuilder::SELECT_ALIAS, $order);
+            }
+
+            $queryBuilder->addOrderBy($order, $context->getOrderDirection());
         }
 
         $queryBuilder->setMaxResults($context->getLimit());

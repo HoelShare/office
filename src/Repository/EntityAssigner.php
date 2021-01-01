@@ -3,9 +3,14 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Repository\Exception\NotSupportedFieldTypeException;
+use App\Repository\Exception\ValueNullException;
+use App\Repository\Exception\WrongDateFormatException;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use ReflectionClass;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use ReflectionMethod;
+use RuntimeException;
 
 class EntityAssigner
 {
@@ -20,6 +25,10 @@ class EntityAssigner
             $setterName = 'set' . ucfirst($key);
 
             if ($this->isFkField($key)) {
+                if (method_exists($object, $setterName)) {
+                    $this->setValue($setterName, $object, $value);
+                }
+
                 $propertyName = mb_substr($key, 0, -2);
                 if (!property_exists($object, $propertyName)) {
                     continue;
@@ -34,7 +43,7 @@ class EntityAssigner
         }
     }
 
-    private function isFkField(int|string $key): bool
+    private function isFkField(int | string $key): bool
     {
         return str_ends_with($key, 'Id');
     }
@@ -45,7 +54,7 @@ class EntityAssigner
         $refectionClass = new ReflectionClass($object);
         $property = $refectionClass->getProperty($propertyName);
 
-        $class = (string)$property->getType();
+        $class = (string) $property->getType();
         $class = $this->removeNullable($class);
 
         $value = $this->entityManager->getReference($class, $value);
@@ -69,37 +78,54 @@ class EntityAssigner
 
     private function setValue(string $methodName, $object, mixed $value): void
     {
-        $method = new \ReflectionMethod($object, $methodName);
+        $method = new ReflectionMethod($object, $methodName);
         if ($method->getNumberOfRequiredParameters() !== 1) {
-            throw new BadRequestHttpException();
+            throw new RuntimeException();
+        }
+        $type = $method->getParameters()[0]->getType();
+
+        if ($value === null && $type->allowsNull()) {
+            $object->$methodName($value);
+
+            return;
+        }
+        if ($value === null) {
+            throw new ValueNullException();
         }
 
-        $parameterClass = $this->removeNullable((string)$method->getParameters()[0]->getType());
+        $parameterClass = $this->removeNullable((string) $type);
 
         if (is_a($value, $parameterClass, true)) {
             $object->$methodName($value);
+
             return;
         }
 
-        switch ($parameterClass) {
-            case 'string':
-            case 'int':
-                break;
-            case \DateTimeImmutable::class:
-                $originalValue = $value;
-                $value = \DateTimeImmutable::createFromFormat(DATE_ATOM, $value);
-                if ($value === false) {
-                    throw new BadRequestHttpException(
-                        sprintf('%s not in Format %s', $originalValue, DATE_ATOM)
-                    );
-                }
-                break;
-            default:
-                throw new BadRequestHttpException(
-                    sprintf('Unsupported Class %s for method %s on %s', $parameterClass, $methodName, $object::class)
-                );
-        }
+        $value = $this->mapField($parameterClass, $value, $object);
 
         $object->$methodName($value);
+    }
+
+    private function mapField(string $parameterClass, mixed $value, $object): mixed
+    {
+        switch ($parameterClass) {
+            case 'string':
+                return (string) $value;
+            case 'int':
+                return (int) $value;
+            case DateTimeImmutable::class:
+                $originalValue = $value;
+                $value = DateTimeImmutable::createFromFormat(DATE_ATOM, $value);
+                if ($value === false) {
+                    throw new WrongDateFormatException($originalValue, DATE_ATOM);
+                }
+
+                return $value;
+            default:
+                throw new NotSupportedFieldTypeException(
+                    $parameterClass,
+                    $object::class,
+                );
+        }
     }
 }

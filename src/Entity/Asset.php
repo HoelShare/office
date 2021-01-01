@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * @ORM\Entity()
  */
-class Resource implements JsonSerializable
+class Asset implements JsonSerializable
 {
     use EntitySerializableTrait;
 
@@ -36,13 +36,13 @@ class Resource implements JsonSerializable
     private string $name;
 
     /**
-     * @ORM\OneToMany(targetEntity=SeatResource::class, mappedBy="resources")
+     * @ORM\OneToMany(targetEntity=SeatAsset::class, mappedBy="asset")
      */
-    private Collection $seatResources;
+    private Collection $seatAssets;
 
     public function __construct()
     {
-        $this->seatResources = new ArrayCollection();
+        $this->seatAssets = new ArrayCollection();
     }
 
     public function getId(): int
@@ -75,13 +75,13 @@ class Resource implements JsonSerializable
         $this->name = $name;
     }
 
-    public function getSeatResources(): ArrayCollection | Collection
+    public function getSeatAssets(): ArrayCollection | Collection
     {
-        return $this->seatResources;
+        return $this->seatAssets;
     }
 
-    public function setSeatResources(ArrayCollection | Collection $seatResources): void
+    public function setSeatAssets(ArrayCollection | Collection $seatAssets): void
     {
-        $this->seatResources = $seatResources;
+        $this->seatAssets = $seatAssets;
     }
 }

@@ -58,9 +58,9 @@ class Seat implements JsonSerializable
     private ?Floor $floor;
 
     /**
-     * @ORM\OneToMany(targetEntity=SeatResource::class, mappedBy="seats")
+     * @ORM\OneToMany(targetEntity=SeatAsset::class, mappedBy="seat")
      */
-    private Collection $seatResources;
+    private Collection $seatAssets;
 
     /**
      * @ORM\OneToMany(targetEntity=Booking::class, mappedBy="seat", orphanRemoval=true)
@@ -69,7 +69,7 @@ class Seat implements JsonSerializable
 
     public function __construct()
     {
-        $this->seatResources = new ArrayCollection();
+        $this->seatAssets = new ArrayCollection();
         $this->bookings = new ArrayCollection();
     }
 
@@ -113,14 +113,14 @@ class Seat implements JsonSerializable
         $this->locationY = $locationY;
     }
 
-    public function getSeatResources(): ArrayCollection | Collection
+    public function getSeatAssets(): ArrayCollection | Collection
     {
-        return $this->seatResources;
+        return $this->seatAssets;
     }
 
-    public function setSeatResources(ArrayCollection | Collection $seatResources): void
+    public function setSeatAssets(ArrayCollection | Collection $seatAssets): void
     {
-        $this->seatResources = $seatResources;
+        $this->seatAssets = $seatAssets;
     }
 
     public function getBookings(): ArrayCollection | Collection

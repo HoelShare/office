@@ -13,7 +13,7 @@ class LdapUser
 
     public string $fullName;
 
-    public array $roles;
+    public array $roles = [];
 
-    public string $image;
+    public ?string $image = null;
 }

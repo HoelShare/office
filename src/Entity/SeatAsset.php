@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * @ORM\Entity()
  */
-class SeatResource implements JsonSerializable
+class SeatAsset implements JsonSerializable
 {
     use EntitySerializableTrait;
 
@@ -25,21 +25,21 @@ class SeatResource implements JsonSerializable
      * @ORM\Column(type="integer")
      * @Assert\NotBlank()
      */
-    private int $order;
+    private int $priority;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Seat::class, inversedBy="seatResources")
+     * @ORM\ManyToOne(targetEntity=Seat::class, inversedBy="seatAssets")
      * @ORM\JoinColumn(nullable=false)
      * @Assert\NotBlank
      */
     private ?Seat $seat;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Resource::class, inversedBy="seatResource")
+     * @ORM\ManyToOne(targetEntity=Asset::class, inversedBy="seatAssets")
      * @ORM\JoinColumn(nullable=false)
      * @Assert\NotBlank
      */
-    private ?Resource $resource;
+    private ?Asset $asset;
 
     public function getId(): int
     {
@@ -51,14 +51,14 @@ class SeatResource implements JsonSerializable
         $this->id = $id;
     }
 
-    public function getOrder(): int
+    public function getPriority(): int
     {
-        return $this->order;
+        return $this->priority;
     }
 
-    public function setOrder(int $order): void
+    public function setPriority(int $priority): void
     {
-        $this->order = $order;
+        $this->priority = $priority;
     }
 
     public function getSeat(): ?Seat
@@ -71,13 +71,13 @@ class SeatResource implements JsonSerializable
         $this->seat = $seat;
     }
 
-    public function getResource()
+    public function getAsset(): Asset
     {
-        return $this->resource;
+        return $this->asset;
     }
 
-    public function setResource($resource): void
+    public function setAsset(Asset $asset): void
     {
-        $this->resource = $resource;
+        $this->asset = $asset;
     }
 }

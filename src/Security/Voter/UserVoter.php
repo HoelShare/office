@@ -37,7 +37,7 @@ class UserVoter extends Voter
 
         $authedUser = $token->getUser();
 
-        return $subject->getUsername() === $authedUser->getUsername()
+        return ($authedUser !== null && $subject->getUsername() === $authedUser->getUsername())
             || $this->authorizationChecker->isGranted('ROLE_ADMIN');
     }
 }

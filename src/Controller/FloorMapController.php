@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class FloorMapController extends AbstractController
@@ -36,8 +37,13 @@ class FloorMapController extends AbstractController
         }
         $context = $this->contextFactory->create($request, $this->getUser());
 
-        /** @var Floor $detail */
+        /** @var ?Floor $detail */
         $detail = $this->entityRepository->get('floor', $id, $context);
+
+        if ($detail === null) {
+            throw new NotFoundHttpException();
+        }
+
         $this->fileHandler->uploadMap($detail, array_values($files)[0]);
 
         return new JsonResponse(['floor' => $detail]);

@@ -13,6 +13,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
@@ -45,8 +46,8 @@ class LdapAuthenticator extends AbstractAuthenticator
         }
 
         $this->userService->addToken($user);
-
-        return new SelfValidatingPassport($user);
+        $userBadge = new UserBadge($user->getLdapId(), fn() => $user);
+        return new SelfValidatingPassport($userBadge);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response

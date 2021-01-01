@@ -9,6 +9,6 @@ class TokenService
 {
     public function generateToken(User $user): string
     {
-        return uniqid('', more_entropy: true);
+        return spl_object_hash($user);
     }
 }

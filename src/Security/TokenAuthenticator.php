@@ -12,6 +12,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
@@ -46,8 +47,8 @@ class TokenAuthenticator extends AbstractAuthenticator
         if ($user === null) {
             throw new UsernameNotFoundException();
         }
-
-        return new SelfValidatingPassport($user);
+        $badge = new UserBadge($apiToken, fn() => $user);
+        return new SelfValidatingPassport($badge);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response

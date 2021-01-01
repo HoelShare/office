@@ -95,10 +95,6 @@ class ErrorResponseFactory
             if (is_array($value)) {
                 $array[$key] = $this->convert($value);
             }
-
-            if (is_string($value) && !mb_detect_encoding($value, mb_detect_order(), true)) {
-                $array[$key] = utf8_encode($value);
-            }
         }
 
         return $array;

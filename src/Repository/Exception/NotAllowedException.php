@@ -17,6 +17,7 @@ class NotAllowedException extends HttpException implements OfficeException
 
     public function getErrors(): array
     {
+        // TODO: Enrich with useful information
         return [];
     }
 }

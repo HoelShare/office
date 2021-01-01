@@ -112,7 +112,7 @@ class Floor implements JsonSerializable
 
     public function setSeats(Collection $seats): void
     {
-        $this->$seats = $seats;
+        $this->seats = $seats;
     }
 
     public function addSeat(Seat $seat): self

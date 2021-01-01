@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -43,6 +44,10 @@ class ApiController extends AbstractController
 
         $detail = $this->entityRepository->get($entity, $id, $context);
 
+        if ($detail === null) {
+            throw new NotFoundHttpException();
+        }
+
         return new JsonResponse($detail);
     }
 
@@ -69,7 +74,7 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route(path="/{entity}/{id}", name="update", methods={"DELETE"}, requirements={"id"="\d+"})
+     * @Route(path="/{entity}/{id}", name="delete", methods={"DELETE"}, requirements={"id"="\d+"})
      */
     public function deleteAction(Request $request, string $entity, string $id): JsonResponse
     {
