@@ -47,7 +47,8 @@ class TokenAuthenticator extends AbstractAuthenticator
         if ($user === null) {
             throw new UsernameNotFoundException();
         }
-        $badge = new UserBadge($apiToken, fn() => $user);
+        $badge = new UserBadge($apiToken, fn () => $user);
+
         return new SelfValidatingPassport($badge);
     }
 

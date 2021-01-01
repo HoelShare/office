@@ -29,7 +29,7 @@ trait KernelTestBehaviour
     protected function assertEvent(string $eventName, callable $callback, ?callable $eventCallback = null): void
     {
         $eventDidRun = false;
-        $callable = function ($event) use (&$eventDidRun, $eventCallback) {
+        $callable = function ($event) use (&$eventDidRun, $eventCallback): void {
             $eventDidRun = true;
             if ($eventCallback !== null) {
                 $eventCallback($event);

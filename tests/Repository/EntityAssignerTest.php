@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Repository;
 
+use App\Entity\Asset;
 use App\Entity\Booking;
 use App\Entity\Building;
 use App\Entity\Floor;
-use App\Entity\Asset;
 use App\Entity\User;
 use App\Repository\EntityAssigner;
 use App\Repository\Exception\NotSupportedFieldTypeException;

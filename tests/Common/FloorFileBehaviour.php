@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Tests\Common;
 
@@ -9,6 +10,7 @@ trait FloorFileBehaviour
     abstract protected function getContainer(): ContainerInterface;
 
     private ?array $files;
+
     private string $path;
 
     /**

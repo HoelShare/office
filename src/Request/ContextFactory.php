@@ -22,7 +22,7 @@ class ContextFactory
         $direction = 'ASC';
         if ($order !== null && str_starts_with($order, '-')) {
             $direction = 'DESC';
-            $order = substr($order, 1);
+            $order = mb_substr($order, 1);
         }
 
         return new RepositoryContext(

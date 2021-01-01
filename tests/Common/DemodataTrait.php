@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Tests\Common;
 
@@ -21,6 +22,7 @@ trait DemodataTrait
     abstract protected function getContainer(): ContainerInterface;
 
     protected ?User $adminUser;
+
     protected ?User $user;
 
     private function getEntityManager(): EntityManagerInterface

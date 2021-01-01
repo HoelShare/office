@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Tests\Ldap;
 
-use App\Ldap\LdapUser;
 use App\Ldap\UserMapper;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 class UserMapperTest extends TestCase
 {
@@ -24,7 +25,7 @@ class UserMapperTest extends TestCase
 
     public function testMappingWithInvalidPath(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Field id not found');
         $this->mapper->mapUserInfo(['not' => 'every', 'key' => 'is', 'set']);
     }

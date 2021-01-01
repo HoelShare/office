@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Tests\Repository;
 
@@ -16,7 +17,9 @@ use App\Tests\Common\DemodataTrait;
 use App\Tests\Common\IntegrationTestBehaviour;
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use function count;
 
 class EntityRepositoryTest extends TestCase
 {
@@ -24,6 +27,7 @@ class EntityRepositoryTest extends TestCase
     use DemodataTrait;
 
     private EntityRepository $entityRepository;
+
     private Connection $connection;
 
     protected function setUp(): void
@@ -54,16 +58,16 @@ class EntityRepositoryTest extends TestCase
     {
         $this->authorizeUser($this->user);
         $context = new RepositoryContext(user: $this->user);
-        $entity = $this->entityRepository->get('user', (string)$this->adminUser->getId(), $context);
+        $entity = $this->entityRepository->get('user', (string) $this->adminUser->getId(), $context);
         static::assertNull($entity);
-        $entity = $this->entityRepository->get('user', (string)$this->user->getId(), $context);
+        $entity = $this->entityRepository->get('user', (string) $this->user->getId(), $context);
         static::assertNotNull($entity);
 
         $this->authorizeUser($this->adminUser);
         $context = new RepositoryContext(user: $this->adminUser);
-        $entity = $this->entityRepository->get('user', (string)$this->adminUser->getId(), $context);
+        $entity = $this->entityRepository->get('user', (string) $this->adminUser->getId(), $context);
         static::assertNotNull($entity);
-        $entity = $this->entityRepository->get('user', (string)$this->user->getId(), $context);
+        $entity = $this->entityRepository->get('user', (string) $this->user->getId(), $context);
         static::assertNotNull($entity);
     }
 
@@ -75,7 +79,7 @@ class EntityRepositoryTest extends TestCase
         $this->getEntityManager()->flush();
 
         $this->expectException(NotAllowedException::class);
-        $this->entityRepository->get('ldapToken', (string)$token->getId(), $context);
+        $this->entityRepository->get('ldapToken', (string) $token->getId(), $context);
     }
 
     public function testGetNotExistingEntityClass(): void
@@ -96,7 +100,7 @@ class EntityRepositoryTest extends TestCase
 
     public function testReadUserWithoutUserInContext(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('No user set');
         $this->entityRepository->read('user', new RepositoryContext());
     }
@@ -106,7 +110,7 @@ class EntityRepositoryTest extends TestCase
         $this->authorizeUser($this->user);
         $context = new RepositoryContext(user: $this->user);
         $entities = $this->entityRepository->read('user', $context);
-        $count = (int)$this->connection->fetchOne('SELECT count(*) FROM user');
+        $count = (int) $this->connection->fetchOne('SELECT count(*) FROM user');
 
         static::assertNotCount($count, $entities);
         static::assertLessThan($count, count($entities));
@@ -169,8 +173,8 @@ class EntityRepositoryTest extends TestCase
         $data = ['name' => 'Foo', 'type' => 'bar'];
 
         $this->assertEvent(WriteEvent::class,
-            fn() => $this->entityRepository->write('asset', $data),
-            function ($event) use ($data) {
+            fn () => $this->entityRepository->write('asset', $data),
+            function ($event) use ($data): void {
                 static::assertInstanceOf(WriteEvent::class, $event);
                 static::assertSame(Asset::class, $event->getClass());
                 static::assertInstanceOf(Asset::class, $event->getObject());
@@ -190,7 +194,7 @@ class EntityRepositoryTest extends TestCase
     public function testWriteNotAllowedByVoters(): void
     {
         $this->authorizeUser($this->user);
-        $data = ['userId' => $this->adminUser->getId(),];
+        $data = ['userId' => $this->adminUser->getId()];
 
         $this->expectException(NotAllowedException::class);
         $this->entityRepository->write('booking', $data);
@@ -206,7 +210,7 @@ class EntityRepositoryTest extends TestCase
             static::fail('Exception was not thrown');
         } catch (ValidationException $exception) {
             static::assertSame(['name' => [
-                'This value should not be blank.'
+                'This value should not be blank.',
             ]], $exception->getErrors());
         }
     }
@@ -214,12 +218,12 @@ class EntityRepositoryTest extends TestCase
     public function testWriteAddsEntity(): void
     {
         $this->authorizeUser($this->adminUser);
-        $countBefore = (int)$this->connection->fetchOne('SELECT COUNT(*) FROM asset');
+        $countBefore = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM asset');
 
         $data = ['name' => 'Foo', 'type' => 'bar'];
         $this->entityRepository->write('asset', $data);
 
-        $countAfter = (int)$this->connection->fetchOne('SELECT COUNT(*) FROM asset');
+        $countAfter = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM asset');
         static::assertSame($countBefore + 1, $countAfter);
     }
 
@@ -243,9 +247,9 @@ class EntityRepositoryTest extends TestCase
 
     public function testUpdateNotFound(): void
     {
-        $id = (int)$this->connection->fetchOne('SELECT MAX(ID) FROM asset');
+        $id = (int) $this->connection->fetchOne('SELECT MAX(ID) FROM asset');
         $this->expectException(NotFoundHttpException::class);
-        $this->entityRepository->update(new RepositoryContext(), 'asset', (string)($id + 1), []);
+        $this->entityRepository->update(new RepositoryContext(), 'asset', (string) ($id + 1), []);
     }
 
     public function testUpdateNotAllowed(): void
@@ -262,8 +266,8 @@ class EntityRepositoryTest extends TestCase
         $data = ['name' => 'foobar'];
         $this->assertEvent(
             UpdateEvent::class,
-            fn() => $this->entityRepository->update(new RepositoryContext(), 'asset', $id, $data),
-            function ($event) use ($data) {
+            fn () => $this->entityRepository->update(new RepositoryContext(), 'asset', $id, $data),
+            function ($event) use ($data): void {
                 static::assertInstanceOf(UpdateEvent::class, $event);
                 static::assertSame(Asset::class, $event->getClass());
                 static::assertInstanceOf(Asset::class, $event->getObject());
@@ -279,8 +283,8 @@ class EntityRepositoryTest extends TestCase
         $data = ['name' => 'foobar', 'id' => 4];
         $this->assertEvent(
             UpdateEvent::class,
-            fn() => $this->entityRepository->update(new RepositoryContext(), 'asset', $id, $data),
-            function ($event) {
+            fn () => $this->entityRepository->update(new RepositoryContext(), 'asset', $id, $data),
+            function ($event): void {
                 static::assertArrayNotHasKey('id', $event->getRawData());
             },
         );
@@ -339,7 +343,7 @@ class EntityRepositoryTest extends TestCase
         $this->getEntityManager()->flush();
         $id = $asset->getId();
 
-        $this->entityRepository->delete(new RepositoryContext(), 'asset', (string)$id);
+        $this->entityRepository->delete(new RepositoryContext(), 'asset', (string) $id);
 
         $result = $this->connection->fetchOne('SELECT id FROM asset where id = :id', ['id' => $id]);
         static::assertFalse($result);

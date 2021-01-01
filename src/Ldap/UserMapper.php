@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Ldap;
 
-use Exception;
+use RuntimeException;
 
 class UserMapper
 {
@@ -45,7 +45,7 @@ class UserMapper
     private function getField(array $rawData, string $fieldPath, bool $allowArray = false): string | array
     {
         if (!isset($rawData[$fieldPath])) {
-            throw new \RuntimeException(sprintf('Field %s not found', $fieldPath));
+            throw new RuntimeException(sprintf('Field %s not found', $fieldPath));
         }
 
         $data = $rawData[$fieldPath];

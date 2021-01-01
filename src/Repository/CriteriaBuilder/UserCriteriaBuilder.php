@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Request\RepositoryContext;
 use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\QueryBuilder;
+use RuntimeException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class UserCriteriaBuilder implements CriteriaBuilder
@@ -32,7 +33,7 @@ class UserCriteriaBuilder implements CriteriaBuilder
     {
         $user = $context->getUser();
         if (!$user instanceof User) {
-            throw new \RuntimeException('No user set');
+            throw new RuntimeException('No user set');
         }
 
         yield $queryBuilder->expr()->eq('e.id', $user->getId());

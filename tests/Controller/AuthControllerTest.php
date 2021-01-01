@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
@@ -25,7 +26,7 @@ class AuthControllerTest extends TestCase
         $client = $this->getClient();
         $client->request('POST', '/login', [
             'username' => 'Hubert J. Farnsworth',
-            'password' => 'professor'
+            'password' => 'professor',
         ]);
 
         static::assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
@@ -36,7 +37,7 @@ class AuthControllerTest extends TestCase
         $client = $this->getClient();
         $client->request('POST', '/login', [
             'username' => 'Hubert J. Farnsworth',
-            'password' => 'test'
+            'password' => 'test',
         ]);
 
         static::assertSame(Response::HTTP_UNAUTHORIZED, $client->getResponse()->getStatusCode());
@@ -46,7 +47,7 @@ class AuthControllerTest extends TestCase
     {
         $client = $this->getClient();
         $client->request('POST', '/login', [
-            'password' => 'test'
+            'password' => 'test',
         ]);
 
         static::assertSame(Response::HTTP_UNAUTHORIZED, $client->getResponse()->getStatusCode());
@@ -56,7 +57,7 @@ class AuthControllerTest extends TestCase
     {
         $client = $this->getClient();
         $client->request('POST', '/login', [
-            'username' => 'test'
+            'username' => 'test',
         ]);
 
         static::assertSame(Response::HTTP_UNAUTHORIZED, $client->getResponse()->getStatusCode());
@@ -67,7 +68,7 @@ class AuthControllerTest extends TestCase
         $client = $this->getClient();
         $client->request('POST', '/login', [
             'username' => 'Hubert J. Farnsworth',
-            'password' => 'professor'
+            'password' => 'professor',
         ]);
 
         $jsonResponse = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -79,7 +80,7 @@ class AuthControllerTest extends TestCase
         $client = $this->getClient();
         $client->request('POST', '/login', [
             'username' => 'Hubert J. Farnsworth',
-            'password' => 'professor'
+            'password' => 'professor',
         ]);
 
         $jsonResponse = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -91,13 +92,13 @@ class AuthControllerTest extends TestCase
         $client = $this->getClient();
         $client->request('POST', '/login', [
             'username' => 'Philip J. Fry',
-            'password' => 'fry'
+            'password' => 'fry',
         ]);
 
         static::assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
     }
 
-    public function testAuthFailedWithoutToken()
+    public function testAuthFailedWithoutToken(): void
     {
         $client = $this->getClient();
         $client->request('GET',
@@ -108,7 +109,7 @@ class AuthControllerTest extends TestCase
         static::assertSame(Response::HTTP_UNAUTHORIZED, $client->getResponse()->getStatusCode());
     }
 
-    public function testAuthFailedWithInvalidToken()
+    public function testAuthFailedWithInvalidToken(): void
     {
         $client = $this->getClient();
         $client->request('GET',

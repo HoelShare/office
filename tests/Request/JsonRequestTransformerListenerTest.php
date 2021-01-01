@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Tests\Request;
 
@@ -12,7 +13,6 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class JsonRequestTransformerListenerTest extends TestCase
 {
-
     public function testSubscribedEvents(): void
     {
         static::assertArrayHasKey(KernelEvents::REQUEST, JsonRequestTransformerListener::getSubscribedEvents());

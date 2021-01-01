@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Tests\Repository\Event;
 
@@ -7,6 +8,7 @@ use App\Repository\Event\BookingWriteListener;
 use App\Repository\Event\WriteEvent;
 use App\Tests\Common\DemodataTrait;
 use App\Tests\Common\IntegrationTestBehaviour;
+use DateInterval;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,6 +22,7 @@ class BookingWriteListenerTest extends TestCase
     use DemodataTrait;
 
     private BookingWriteListener $writeListener;
+
     private Connection $connection;
 
     protected function setUp(): void
@@ -52,7 +55,7 @@ class BookingWriteListenerTest extends TestCase
     public function testFromDateAfterUntilDate(): void
     {
         $object = new Booking();
-        $object->setFromDay((new DateTimeImmutable())->add(new \DateInterval('PT1M')));
+        $object->setFromDay((new DateTimeImmutable())->add(new DateInterval('PT1M')));
         $object->setUntilDay(new DateTimeImmutable());
 
         $event = new WriteEvent(Booking::class, $object, []);
@@ -66,7 +69,7 @@ class BookingWriteListenerTest extends TestCase
         $this->authorizeUser($this->user);
         $object = new Booking();
         $object->setFromDay(new DateTimeImmutable());
-        $object->setUntilDay((new DateTimeImmutable())->add(new \DateInterval('PT1M')));
+        $object->setUntilDay((new DateTimeImmutable())->add(new DateInterval('PT1M')));
 
         $event = new WriteEvent(Booking::class, $object, []);
         $this->writeListener->writeBooking($event);
@@ -79,7 +82,7 @@ class BookingWriteListenerTest extends TestCase
         $this->authorizeUser($this->user);
         $object = new Booking();
         $object->setFromDay(new DateTimeImmutable());
-        $object->setUntilDay((new DateTimeImmutable())->add(new \DateInterval('PT1M')));
+        $object->setUntilDay((new DateTimeImmutable())->add(new DateInterval('PT1M')));
         $object->setUser($this->addUser());
 
         $event = new WriteEvent(Booking::class, $object, []);
@@ -93,7 +96,7 @@ class BookingWriteListenerTest extends TestCase
         $this->authorizeUser($this->adminUser);
         $object = new Booking();
         $object->setFromDay(new DateTimeImmutable());
-        $object->setUntilDay((new DateTimeImmutable())->add(new \DateInterval('PT1M')));
+        $object->setUntilDay((new DateTimeImmutable())->add(new DateInterval('PT1M')));
         $object->setUser($this->user);
 
         $event = new WriteEvent(Booking::class, $object, []);
@@ -107,7 +110,7 @@ class BookingWriteListenerTest extends TestCase
         $this->authorizeUser($this->adminUser);
         $object = new Booking();
         $object->setFromDay(new DateTimeImmutable());
-        $object->setUntilDay((new DateTimeImmutable())->add(new \DateInterval('PT1M')));
+        $object->setUntilDay((new DateTimeImmutable())->add(new DateInterval('PT1M')));
         $object->setUser($this->adminUser);
 
         $event = new WriteEvent(Booking::class, $object, []);
@@ -121,7 +124,7 @@ class BookingWriteListenerTest extends TestCase
         $this->authorizeUser($this->adminUser);
         $object = new Booking();
         $object->setFromDay(new DateTimeImmutable());
-        $object->setUntilDay((new DateTimeImmutable())->add(new \DateInterval('PT1M')));
+        $object->setUntilDay((new DateTimeImmutable())->add(new DateInterval('PT1M')));
 
         $event = new WriteEvent(Booking::class, $object, []);
         $this->writeListener->writeBooking($event);
@@ -136,14 +139,14 @@ class BookingWriteListenerTest extends TestCase
             $this->user,
             $seat,
             new DateTimeImmutable(),
-            (new DateTimeImmutable())->add(new \DateInterval('PT8H'))
+            (new DateTimeImmutable())->add(new DateInterval('PT8H'))
         );
         $this->getEntityManager()->flush();
 
         $booking = new Booking();
         $booking->setSeat($seat);
-        $booking->setFromDay((new DateTimeImmutable())->sub(new \DateInterval('PT4H')));
-        $booking->setUntilDay((new DateTimeImmutable())->add(new \DateInterval('PT4H')));
+        $booking->setFromDay((new DateTimeImmutable())->sub(new DateInterval('PT4H')));
+        $booking->setUntilDay((new DateTimeImmutable())->add(new DateInterval('PT4H')));
 
         $event = new WriteEvent(Booking::class, $booking, []);
 
@@ -160,14 +163,14 @@ class BookingWriteListenerTest extends TestCase
             $this->user,
             $seat,
             new DateTimeImmutable(),
-            (new DateTimeImmutable())->add(new \DateInterval('PT8H'))
+            (new DateTimeImmutable())->add(new DateInterval('PT8H'))
         );
         $this->getEntityManager()->flush();
 
         $booking = new Booking();
         $booking->setSeat($seat);
-        $booking->setFromDay((new DateTimeImmutable())->add(new \DateInterval('PT4H')));
-        $booking->setUntilDay((new DateTimeImmutable())->add(new \DateInterval('PT12H')));
+        $booking->setFromDay((new DateTimeImmutable())->add(new DateInterval('PT4H')));
+        $booking->setUntilDay((new DateTimeImmutable())->add(new DateInterval('PT12H')));
 
         $event = new WriteEvent(Booking::class, $booking, []);
 
@@ -184,14 +187,14 @@ class BookingWriteListenerTest extends TestCase
             $this->user,
             $seat,
             new DateTimeImmutable(),
-            (new DateTimeImmutable())->add(new \DateInterval('PT8H'))
+            (new DateTimeImmutable())->add(new DateInterval('PT8H'))
         );
         $this->getEntityManager()->flush();
 
         $booking = new Booking();
         $booking->setSeat($seat);
-        $booking->setFromDay((new DateTimeImmutable())->sub(new \DateInterval('PT4H')));
-        $booking->setUntilDay((new DateTimeImmutable())->add(new \DateInterval('PT12H')));
+        $booking->setFromDay((new DateTimeImmutable())->sub(new DateInterval('PT4H')));
+        $booking->setUntilDay((new DateTimeImmutable())->add(new DateInterval('PT12H')));
 
         $event = new WriteEvent(Booking::class, $booking, []);
 
@@ -208,14 +211,14 @@ class BookingWriteListenerTest extends TestCase
             $this->user,
             $seat,
             new DateTimeImmutable(),
-            (new DateTimeImmutable())->add(new \DateInterval('PT8H'))
+            (new DateTimeImmutable())->add(new DateInterval('PT8H'))
         );
         $this->getEntityManager()->flush();
 
         $booking = new Booking();
         $booking->setSeat($seat);
-        $booking->setFromDay((new DateTimeImmutable())->add(new \DateInterval('PT4H')));
-        $booking->setUntilDay((new DateTimeImmutable())->add(new \DateInterval('PT5H')));
+        $booking->setFromDay((new DateTimeImmutable())->add(new DateInterval('PT4H')));
+        $booking->setUntilDay((new DateTimeImmutable())->add(new DateInterval('PT5H')));
 
         $event = new WriteEvent(Booking::class, $booking, []);
 
@@ -233,13 +236,13 @@ class BookingWriteListenerTest extends TestCase
             $this->user,
             $seat,
             $startDate,
-            $startDate->add(new \DateInterval('PT8H'))
+            $startDate->add(new DateInterval('PT8H'))
         );
         $this->getEntityManager()->flush();
 
         $booking = new Booking();
         $booking->setSeat($seat);
-        $booking->setFromDay($startDate->sub(new \DateInterval('PT4H')));
+        $booking->setFromDay($startDate->sub(new DateInterval('PT4H')));
         $booking->setUntilDay($startDate);
 
         $event = new WriteEvent(Booking::class, $booking, []);
@@ -254,7 +257,7 @@ class BookingWriteListenerTest extends TestCase
         $this->addBooking(
             $this->user,
             $seat,
-            $startDate->sub(new \DateInterval('PT8H')),
+            $startDate->sub(new DateInterval('PT8H')),
             $startDate,
         );
         $this->getEntityManager()->flush();
@@ -262,7 +265,7 @@ class BookingWriteListenerTest extends TestCase
         $booking = new Booking();
         $booking->setSeat($seat);
         $booking->setFromDay($startDate);
-        $booking->setUntilDay($startDate->add(new \DateInterval('PT4H')));
+        $booking->setUntilDay($startDate->add(new DateInterval('PT4H')));
 
         $event = new WriteEvent(Booking::class, $booking, []);
 

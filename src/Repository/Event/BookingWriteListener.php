@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Repository\Event;
 
@@ -51,7 +52,6 @@ class BookingWriteListener implements EventSubscriberInterface
     {
         if ($this->security->isGranted('ROLE_ADMIN')
             && $booking->getUser() !== null) {
-
             return;
         }
 

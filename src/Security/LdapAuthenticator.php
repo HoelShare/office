@@ -46,7 +46,8 @@ class LdapAuthenticator extends AbstractAuthenticator
         }
 
         $this->userService->addToken($user);
-        $userBadge = new UserBadge($user->getLdapId(), fn() => $user);
+        $userBadge = new UserBadge($user->getLdapId(), fn () => $user);
+
         return new SelfValidatingPassport($userBadge);
     }
 

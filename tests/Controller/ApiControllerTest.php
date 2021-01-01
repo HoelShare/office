@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
@@ -48,7 +49,7 @@ class ApiControllerTest extends TestCase
         static::assertArrayHasKey('asset', $jsonResponse);
         static::assertIsArray($jsonResponse['asset']);
 
-        $count = (int)$this->connection->fetchOne('SELECT count(*) from asset');
+        $count = (int) $this->connection->fetchOne('SELECT count(*) from asset');
         static::assertCount($count, $jsonResponse['asset']);
     }
 
@@ -65,7 +66,7 @@ class ApiControllerTest extends TestCase
         static::assertArrayHasKey('asset', $jsonResponse);
         static::assertIsArray($jsonResponse['asset']);
 
-        $count = (int)$this->connection->fetchOne('SELECT count(*) from asset where type = :type', ['type' => 'Monitor']);
+        $count = (int) $this->connection->fetchOne('SELECT count(*) from asset where type = :type', ['type' => 'Monitor']);
         static::assertCount($count, $jsonResponse['asset']);
         static::assertGreaterThan(0, $count);
     }
@@ -82,11 +83,10 @@ class ApiControllerTest extends TestCase
         static::assertArrayHasKey('asset', $jsonResponse);
         static::assertIsArray($jsonResponse['asset']);
 
-        $count = (int)$this->connection->fetchOne('SELECT count(*) from asset where type = :type', ['type' => 'Monitor']);
+        $count = (int) $this->connection->fetchOne('SELECT count(*) from asset where type = :type', ['type' => 'Monitor']);
         static::assertCount($count, $jsonResponse['asset']);
         static::assertGreaterThan(0, $count);
     }
-
 
     public function testListCanBeFilteredWithMultiple(): void
     {
@@ -101,7 +101,7 @@ class ApiControllerTest extends TestCase
         static::assertArrayHasKey('asset', $jsonResponse);
         static::assertIsArray($jsonResponse['asset']);
 
-        $count = (int)$this->connection->fetchOne('SELECT count(*) from asset where type = :type and name <> :name', ['type' => 'os', 'name' => 'Windows']);
+        $count = (int) $this->connection->fetchOne('SELECT count(*) from asset where type = :type and name <> :name', ['type' => 'os', 'name' => 'Windows']);
         static::assertCount($count, $jsonResponse['asset']);
         static::assertGreaterThan(0, $count);
     }
@@ -165,14 +165,14 @@ class ApiControllerTest extends TestCase
     {
         $client = $this->getClient();
 
-        $countBefore = (int)$this->connection->fetchOne('SELECT count(*) FROM asset');
+        $countBefore = (int) $this->connection->fetchOne('SELECT count(*) FROM asset');
 
         $client->request(Request::METHOD_POST, '/api/asset',
             parameters: ['name' => 'foo', 'type' => 'bar'],
             server: ['HTTP_auth-token' => $this->getUserToken($this->adminUser)],
         );
 
-        $countAfter = (int)$this->connection->fetchOne('SELECT count(*) FROM asset');
+        $countAfter = (int) $this->connection->fetchOne('SELECT count(*) FROM asset');
 
         static::assertSame(Response::HTTP_NO_CONTENT, $client->getResponse()->getStatusCode());
         static::assertSame($countBefore + 1, $countAfter);
@@ -183,13 +183,12 @@ class ApiControllerTest extends TestCase
         static::assertSame('bar', $result['type']);
     }
 
-
     public function testCreateUser(): void
     {
         $client = $this->getClient();
 
         $client->request(Request::METHOD_POST, '/api/user',
-            parameters: ['name' => 'foo',],
+            parameters: ['name' => 'foo'],
             server: ['HTTP_auth-token' => $this->getUserToken($this->adminUser)],
         );
 

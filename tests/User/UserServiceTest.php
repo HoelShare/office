@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Tests\User;
 
@@ -15,6 +16,7 @@ class UserServiceTest extends TestCase
     use DemodataTrait;
 
     private UserService $userService;
+
     private Connection $connection;
 
     protected function setUp(): void
@@ -34,9 +36,9 @@ class UserServiceTest extends TestCase
 
     public function testAddsTokenToDatabase(): void
     {
-        $countBefore = (int)$this->connection->fetchOne('SELECT COUNT(*) FROM ldap_token');
+        $countBefore = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM ldap_token');
         $this->userService->addToken($this->user);
-        $countAfter = (int)$this->connection->fetchOne('SELECT COUNT(*) FROM ldap_token');
+        $countAfter = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM ldap_token');
 
         static::assertSame($countBefore + 1, $countAfter);
     }
@@ -45,7 +47,7 @@ class UserServiceTest extends TestCase
     {
         $this->userService->addToken($this->user);
         $token = $this->user->getLdapTokens()->first();
-        $userId = (int)$this->connection->fetchOne('SELECT user_id FROM ldap_token where id = :id', ['id' => $token->getId()]);
+        $userId = (int) $this->connection->fetchOne('SELECT user_id FROM ldap_token where id = :id', ['id' => $token->getId()]);
 
         static::assertSame($this->user->getId(), $userId);
         static::assertSame($this->user->getId(), $token->getUser()->getId());
@@ -82,7 +84,7 @@ class UserServiceTest extends TestCase
 
         $user = $this->connection->fetchAssociative('SELECT * from user where ldap_id = :ldap', ['ldap' => $ldapUser->id]);
 
-        static::assertNotEquals(false, $user, 'User was not created');
+        static::assertNotFalse($user, 'User was not created');
         static::assertSame($ldapUser->id, $user['ldap_id']);
         static::assertSame($ldapUser->fullName, $user['full_name']);
         static::assertSame($ldapUser->displayName, $user['name']);
@@ -103,7 +105,7 @@ class UserServiceTest extends TestCase
 
         $user = $this->connection->fetchAssociative('SELECT * from user where ldap_id = :ldap', ['ldap' => $ldapUser->id]);
 
-        static::assertNotEquals(false, $user, 'User was not created');
+        static::assertNotFalse($user, 'User was not created');
         static::assertSame($ldapUser->id, $user['ldap_id']);
         static::assertSame($ldapUser->fullName, $user['full_name']);
         static::assertSame($ldapUser->displayName, $user['name']);
