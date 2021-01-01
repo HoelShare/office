@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    container: webdevops/php-apache:8.0
+    services:
+      ldap:
+        image: rroemhild/test-openldap
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_USER: app
+          MYSQL_PASSWORD: app
+          MYSQL_DATABASE: office
+    steps:
+      - uses: actions/checkout@v2
+      - name: Composer installation
+        run: composer install
+      - name: Install
+        run: ./init-test-database.sh
+      - name: PHPUnit Tests
+        run: vendor/bin/simple-phpunit --coverage-text=var/build/text
