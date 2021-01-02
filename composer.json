@@ -68,8 +68,6 @@
         "symfony/css-selector": "5.2.*",
         "symfony/maker-bundle": "^1.25",
         "symfony/phpunit-bridge": "^5.2",
-        "symfony/stopwatch": "^5.2",
-        "symfony/twig-bundle": "^5.2",
-        "symfony/web-profiler-bundle": "^5.2"
+        "symfony/stopwatch": "^5.2"
     }
 }
