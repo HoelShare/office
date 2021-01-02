@@ -22,6 +22,12 @@
 
 ## Docker
 4. run Docker containers: `docker-compose up -d`
+   1. [OPTIONAL] configure user in `docker-compose.override.yml`
+      ```
+      services:
+         app:
+            user: "${UID}:${GID}"
+      ```
 1. Interact with App Docker Container `docker exec -w /app -it office_app /bin/bash`
 1. Install application with `composer install`
 1. Application runs at [localhost:8090](http://localhost:8090/) 
