@@ -9,12 +9,12 @@ services:
       MYSQL_PASSWORD: app
       MYSQL_DATABASE: office
     ports:
-    - 4406:3306
+    - 127.0.0.1:4406:3306
 
   mail:
     image: mailhog/mailhog
     ports:
-    - 8025:8025
+    - 127.0.0.1:8025:8025
 
   app:
     container_name: office_app
@@ -28,7 +28,7 @@ services:
     volumes:
     - .:/app
     ports:
-    - 8090:80
+    - 127.0.0.1:8090:80
 
   ldap:
     image: rroemhild/test-openldap
