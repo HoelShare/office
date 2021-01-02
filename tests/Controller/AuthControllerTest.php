@@ -8,6 +8,7 @@ use App\Tests\Common\DemodataTrait;
 use App\Tests\Common\IntegrationTestBehaviour;
 use App\Tests\Common\WebTestBehaviour;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthControllerTest extends TestCase
@@ -24,7 +25,7 @@ class AuthControllerTest extends TestCase
     public function testAuthenticate(): void
     {
         $client = $this->getClient();
-        $client->request('POST', '/login', [
+        $client->request(Request::METHOD_POST, '/api/login', [
             'username' => 'Hubert J. Farnsworth',
             'password' => 'professor',
         ]);
@@ -35,7 +36,7 @@ class AuthControllerTest extends TestCase
     public function testAuthenticateFails(): void
     {
         $client = $this->getClient();
-        $client->request('POST', '/login', [
+        $client->request(Request::METHOD_POST, '/api/login', [
             'username' => 'Hubert J. Farnsworth',
             'password' => 'test',
         ]);
@@ -46,7 +47,7 @@ class AuthControllerTest extends TestCase
     public function testAuthenticateWithoutUsername(): void
     {
         $client = $this->getClient();
-        $client->request('POST', '/login', [
+        $client->request(Request::METHOD_POST, '/api/login', [
             'password' => 'test',
         ]);
 
@@ -56,7 +57,7 @@ class AuthControllerTest extends TestCase
     public function testAuthenticateWithoutPassword(): void
     {
         $client = $this->getClient();
-        $client->request('POST', '/login', [
+        $client->request(Request::METHOD_POST, '/api/login', [
             'username' => 'test',
         ]);
 
@@ -66,7 +67,7 @@ class AuthControllerTest extends TestCase
     public function testAuthenticateReturnsAuthKey(): void
     {
         $client = $this->getClient();
-        $client->request('POST', '/login', [
+        $client->request(Request::METHOD_POST, '/api/login', [
             'username' => 'Hubert J. Farnsworth',
             'password' => 'professor',
         ]);
@@ -78,7 +79,7 @@ class AuthControllerTest extends TestCase
     public function testAuthenticateReturnsUserInfo(): void
     {
         $client = $this->getClient();
-        $client->request('POST', '/login', [
+        $client->request(Request::METHOD_POST, '/api/login', [
             'username' => 'Hubert J. Farnsworth',
             'password' => 'professor',
         ]);
@@ -90,7 +91,7 @@ class AuthControllerTest extends TestCase
     public function testAuthenticateDifferentUser(): void
     {
         $client = $this->getClient();
-        $client->request('POST', '/login', [
+        $client->request(Request::METHOD_POST, '/api/login', [
             'username' => 'Philip J. Fry',
             'password' => 'fry',
         ]);

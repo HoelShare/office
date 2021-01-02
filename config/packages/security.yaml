@@ -6,7 +6,7 @@ security:
 
   firewalls:
     login:
-      pattern: ^/login
+      pattern: ^/api/login
       stateless: true
       context: my_context
       custom_authenticators:

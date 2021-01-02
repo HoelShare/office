@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class AuthController extends AbstractController
 {
     /**
-     * @Route(path="/login", name="login", methods={"POST"})
+     * @Route(path="/api/login", name="login", methods={"POST"})
      */
     public function loginAction(): void
     {

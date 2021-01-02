@@ -10,6 +10,7 @@ use App\Tests\Common\IntegrationTestBehaviour;
 use App\Tests\Common\WebTestBehaviour;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class FloorMapControllerTest extends TestCase
@@ -46,7 +47,7 @@ class FloorMapControllerTest extends TestCase
     public function testUploadAsAnonymousIsRestricted(): void
     {
         $client = $this->getClient();
-        $client->request('POST',
+        $client->request(Request::METHOD_POST,
             sprintf('/api/floor/%s/upload', $this->floor->getId()),
         );
 
@@ -56,7 +57,7 @@ class FloorMapControllerTest extends TestCase
     public function testUploadAsUserIsRestricted(): void
     {
         $client = $this->getClient();
-        $client->request('POST',
+        $client->request(Request::METHOD_POST,
             sprintf('/api/floor/%s/upload', $this->floor->getId()),
             server: ['HTTP_auth-token' => $this->user->getLdapTokens()->first()->getToken()],
         );
@@ -67,7 +68,7 @@ class FloorMapControllerTest extends TestCase
     public function testUploadRequiresFiles(): void
     {
         $client = $this->getClient();
-        $client->request('POST',
+        $client->request(Request::METHOD_POST,
             sprintf('/api/floor/%s/upload', $this->floor->getId()),
             server: ['HTTP_auth-token' => $this->adminUser->getLdapTokens()->first()->getToken()],
         );
@@ -78,7 +79,7 @@ class FloorMapControllerTest extends TestCase
     public function testUploadInvalidFloor(): void
     {
         $client = $this->getClient();
-        $client->request('POST',
+        $client->request(Request::METHOD_POST,
             sprintf('/api/floor/%s/upload', 1000000),
             files: ['foo' => $this->getFile()],
             server: ['HTTP_auth-token' => $this->adminUser->getLdapTokens()->first()->getToken()],
@@ -90,7 +91,7 @@ class FloorMapControllerTest extends TestCase
     public function testUploadFile(): void
     {
         $client = $this->getClient();
-        $client->request('POST',
+        $client->request(Request::METHOD_POST,
             sprintf('/api/floor/%s/upload', $this->floor->getId()),
             files: ['foo' => $this->getFile()],
             server: ['HTTP_auth-token' => $this->adminUser->getLdapTokens()->first()->getToken()],
