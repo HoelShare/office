@@ -26,6 +26,11 @@ final class Version20201230191845 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_3D5C3666854679E2 ON seat (floor_id)');
     }
 
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function down(Schema $schema) : void
     {
         // this down() migration is auto-generated, please modify it to your needs

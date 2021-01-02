@@ -27,6 +27,11 @@ final class Version20201207182603 extends AbstractMigration
         $this->addSql('ALTER TABLE ldap_token ADD CONSTRAINT FK_BD3AC02AA76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
     }
 
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function down(Schema $schema) : void
     {
         // this down() migration is auto-generated, please modify it to your needs

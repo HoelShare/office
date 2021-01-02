@@ -25,6 +25,11 @@ final class Version20210101094924 extends AbstractMigration
         $this->addSql('ALTER TABLE seat_asset RENAME INDEX idx_a21b841289329d25 TO IDX_D533D1785DA1941');
     }
 
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function down(Schema $schema) : void
     {
         // this down() migration is auto-generated, please modify it to your needs

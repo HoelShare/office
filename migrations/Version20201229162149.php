@@ -35,6 +35,11 @@ final class Version20201229162149 extends AbstractMigration
         $this->addSql('ALTER TABLE user ADD image LONGTEXT DEFAULT NULL, DROP active, CHANGE ldap_id ldap_id VARCHAR(255) NOT NULL, CHANGE email email VARCHAR(255) DEFAULT NULL, CHANGE name name VARCHAR(255) DEFAULT NULL, CHANGE full_name full_name VARCHAR(255) DEFAULT NULL');
     }
 
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function down(Schema $schema) : void
     {
         // this down() migration is auto-generated, please modify it to your needs
