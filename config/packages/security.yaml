@@ -20,9 +20,6 @@ security:
         - App\Security\TokenAuthenticator
 
   access_control:
-    # allow unauthenticated users to access the login form
-    - { path: ^/login, roles: PUBLIC_ACCESS }
-    - { path: ^/, roles: ROLE_USER }
-
-    # but require authentication for all other admin routes
-    - { path: ^/admin, roles: ROLE_ADMIN }
+    # allow unauthenticated users to access the login route
+    - { path: ^/api/login, roles: PUBLIC_ACCESS }
+    - { path: ^/api/, roles: ROLE_USER }
