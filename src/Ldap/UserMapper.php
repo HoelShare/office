@@ -42,10 +42,10 @@ class UserMapper
         return $user;
     }
 
-    private function getField(array $rawData, string $fieldPath, bool $allowArray = false): string | array
+    private function getField(array $rawData, string $fieldPath, bool $allowArray = false): null | string | array
     {
         if (!isset($rawData[$fieldPath])) {
-            throw new RuntimeException(sprintf('Field %s not found', $fieldPath));
+            return null;
         }
 
         $data = $rawData[$fieldPath];

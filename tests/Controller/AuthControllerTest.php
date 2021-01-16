@@ -73,7 +73,7 @@ class AuthControllerTest extends TestCase
         ]);
 
         $jsonResponse = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        static::assertArrayHasKey('auth_token', $jsonResponse);
+        static::assertArrayHasKey('authToken', $jsonResponse);
     }
 
     public function testAuthenticateReturnsUserInfo(): void

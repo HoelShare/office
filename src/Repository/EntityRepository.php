@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Common\HydrateEvent;
 use App\Repository\CriteriaBuilder\CriteriaBuilder;
 use App\Repository\Event\UpdateEvent;
 use App\Repository\Event\WriteEvent;

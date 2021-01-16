@@ -25,9 +25,14 @@ class UserMapperTest extends TestCase
 
     public function testMappingWithInvalidPath(): void
     {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Field id not found');
-        $this->mapper->mapUserInfo(['not' => 'every', 'key' => 'is', 'set']);
+        $user = $this->mapper->mapUserInfo(['not' => 'every', 'key' => 'is', 'set']);
+
+        static::assertNull($user->id);
+        static::assertNull($user->email);
+        static::assertNull($user->roles);
+        static::assertNull($user->displayName);
+        static::assertNull($user->fullName);
+        static::assertNull($user->image);
     }
 
     public function testMappingWithValidPaths(): void

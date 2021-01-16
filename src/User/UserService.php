@@ -28,6 +28,18 @@ class UserService
         $user->addLdapToken($token);
     }
 
+    public function removeToken(User $user, string $token): void
+    {
+        foreach ($user->getLdapTokens() as $ldapToken) {
+            if ($ldapToken->getToken() === $token) {
+                $user->removeLdapToken($ldapToken);
+                $this->entityManager->remove($ldapToken);
+            }
+        }
+
+        $this->entityManager->flush();
+    }
+
     public function updateUser(LdapUser $ldapUser): User
     {
         $user = $this->getUserById($ldapUser->id);

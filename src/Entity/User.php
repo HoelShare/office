@@ -63,6 +63,8 @@ class User implements UserInterface, JsonSerializable
      */
     private Collection $bookings;
 
+    private bool $isAdmin;
+
     public function __construct()
     {
         $this->ldapTokens = new ArrayCollection();
@@ -189,7 +191,7 @@ class User implements UserInterface, JsonSerializable
     public function setImage(?string $image): void
     {
         if ($image) {
-            $image = base64_encode($image);
+            $image = 'data:image/jpeg;base64,' . base64_encode($image);
         }
         $this->image = $image;
     }
@@ -227,5 +229,15 @@ class User implements UserInterface, JsonSerializable
         }
 
         return $this;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->isAdmin;
+    }
+
+    public function setIsAdmin(bool $isAdmin): void
+    {
+        $this->isAdmin = $isAdmin;
     }
 }

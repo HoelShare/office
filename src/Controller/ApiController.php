@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route(path="/api", name="apiController")
+ * @Route(path="/api/{entity}", name="apiController", requirements={"entity"="^(?!logout).*$"})
  */
 class ApiController extends AbstractController
 {
@@ -24,7 +24,7 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route(path="/{entity}", name="list", methods={"GET"})
+     * @Route(path="/", name="list", methods={"GET"})
      */
     public function listAction(Request $request, string $entity): JsonResponse
     {
@@ -36,7 +36,7 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route(path="/{entity}/{id}", name="detail", methods={"GET"}, requirements={"id"="\d+"})
+     * @Route(path="/{id}", name="detail", methods={"GET"}, requirements={"id"="\d+"})
      */
     public function detailAction(Request $request, string $entity, string $id): JsonResponse
     {
@@ -52,7 +52,7 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route(path="/{entity}", name="create", methods={"POST"})
+     * @Route(path="/", name="create", methods={"POST"})
      */
     public function createAction(Request $request, string $entity): JsonResponse
     {
@@ -62,7 +62,7 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route(path="/{entity}/{id}", name="update", methods={"PATCH"}, requirements={"id"="\d+"})
+     * @Route(path="/{id}", name="update", methods={"PATCH"}, requirements={"id"="\d+"})
      */
     public function updateAction(Request $request, string $entity, string $id): JsonResponse
     {
@@ -74,7 +74,7 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route(path="/{entity}/{id}", name="delete", methods={"DELETE"}, requirements={"id"="\d+"})
+     * @Route(path="/{id}", name="delete", methods={"DELETE"}, requirements={"id"="\d+"})
      */
     public function deleteAction(Request $request, string $entity, string $id): JsonResponse
     {

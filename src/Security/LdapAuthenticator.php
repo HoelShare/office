@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace App\Security;
 
+use App\Common\HydrateEvent;
 use App\Entity\User;
 use App\Ldap\LdapService;
+use App\User\UserHydrator;
 use App\User\UserService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,12 +18,14 @@ use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class LdapAuthenticator extends AbstractAuthenticator
 {
     public function __construct(
         private LdapService $ldapService,
         private UserService $userService,
+        private UserHydrator $userHydrator,
     ) {
     }
 
@@ -59,8 +63,10 @@ class LdapAuthenticator extends AbstractAuthenticator
             $authToken = $user->getLdapTokens()->last()->getToken();
         }
 
+        $this->userHydrator->hydrateUser($user);
+
         $data = [
-            'auth_token' => $authToken,
+            'authToken' => $authToken,
             'user' => $user,
         ];
 
