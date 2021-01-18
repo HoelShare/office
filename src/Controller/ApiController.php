@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route(path="/api/{entity}", name="apiController", requirements={"entity"="^(?!logout).*$"})
+ * @Route(path="/api/{entity}", name="apiController", requirements={"entity"="^(?!logout)[A-za-z\-]+$"})
  */
 class ApiController extends AbstractController
 {
@@ -24,7 +24,7 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route(path="/", name="list", methods={"GET"})
+     * @Route(path="", name="list", methods={"GET"})
      */
     public function listAction(Request $request, string $entity): JsonResponse
     {
@@ -52,13 +52,13 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route(path="/", name="create", methods={"POST"})
+     * @Route(path="", name="create", methods={"POST"})
      */
     public function createAction(Request $request, string $entity): JsonResponse
     {
-        $this->entityRepository->write($entity, $request->request->all());
+        $object = $this->entityRepository->write($entity, $request->request->all());
 
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        return new JsonResponse($object);
     }
 
     /**
@@ -68,9 +68,9 @@ class ApiController extends AbstractController
     {
         $context = $this->contextFactory->create($request, $this->getUser());
 
-        $this->entityRepository->update($context, $entity, $id, $request->request->all());
+        $object = $this->entityRepository->update($context, $entity, $id, $request->request->all());
 
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        return new JsonResponse($object);
     }
 
     /**

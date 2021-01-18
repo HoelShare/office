@@ -7,6 +7,8 @@ use App\Controller\AuthController;
 use App\Tests\Common\DemodataTrait;
 use App\Tests\Common\IntegrationTestBehaviour;
 use App\Tests\Common\WebTestBehaviour;
+use App\User\UserService;
+use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -123,7 +125,30 @@ class AuthControllerTest extends TestCase
 
     public function testLoginRouteDoesNothing(): void
     {
-        $controller = new AuthController();
+        $userService = $this->createMock(UserService::class);
+        $userService->expects(static::never())->method(static::anything());
+        $controller = new AuthController($userService);
         $controller->loginAction();
+    }
+
+    public function testLogoutRemovesToken(): void
+    {
+        $connection = $this->getContainer()->get(Connection::class);
+        $connection->executeQuery('INSERT INTO user(ldap_id, roles) values (:id, :roles)',
+            ['id' => uniqid('', true), 'roles' => '["ROLE_USER"]',]);
+        $userId = (int) $connection->lastInsertId();
+        $token = uniqid('', true);
+        $connection->executeQuery('INSERT INTO ldap_token (user_id, token) values (:id, :token)',
+            ['id' => $userId, 'token' => $token]);
+
+        $client = $this->getClient();
+        $client->request(Request::METHOD_GET,
+            '/api/logout',
+            server: ['HTTP_auth-token' => $token],
+        );
+
+        $loggedOut = (int)$connection->fetchOne('SELECT count(*) from ldap_token where token = :token',
+            ['token' => $token]);
+        static::assertSame(0, $loggedOut);
     }
 }

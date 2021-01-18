@@ -31,12 +31,9 @@ class AuthController extends AbstractController
      */
     public function logoutAction(Request $request): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         $token = $request->headers->get('auth-token');
-
-        if (!($user instanceof User) || !$token) {
-            return new JsonResponse(null, Response::HTTP_NO_CONTENT);
-        }
 
         $this->userService->removeToken($user, $token);
 

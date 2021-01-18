@@ -72,7 +72,7 @@ class EntityRepository
         return $results;
     }
 
-    public function write(string $entity, array $data): void
+    public function write(string $entity, array $data): object
     {
         $class = $this->classFinder->findClass($entity);
         $object = new $class();
@@ -94,9 +94,11 @@ class EntityRepository
 
         $this->entityManager->persist($object);
         $this->entityManager->flush();
+
+        return $object;
     }
 
-    public function update(RepositoryContext $context, string $entity, string $id, array $data): void
+    public function update(RepositoryContext $context, string $entity, string $id, array $data): object
     {
         $object = $this->get($entity, $id, $context);
 
@@ -116,6 +118,8 @@ class EntityRepository
 
         $this->entityManager->persist($object);
         $this->entityManager->flush();
+
+        return $object;
     }
 
     public function delete(RepositoryContext $context, string $entity, string $id): void

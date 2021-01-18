@@ -38,7 +38,11 @@ class EntityAssigner
             }
 
             if (method_exists($object, $setterName)) {
-                $this->setValue($setterName, $object, $value);
+                try {
+                    $this->setValue($setterName, $object, $value);
+                } catch (NotSupportedFieldTypeException $exception) {
+                    // NTH
+                }
             }
         }
     }

@@ -137,18 +137,14 @@ class EntityAssignerTest extends TestCase
 
     public function testWriteNotSupportedComplexType(): void
     {
-        $floor = new Floor();
+        $floor = $this->createMock(Floor::class);
         $data = [
             'seats' => 'collection of seats',
         ];
 
-        try {
-            $this->assigner->assignData($floor, $data);
-            static::fail('Exception was not thrown');
-        } catch (NotSupportedFieldTypeException $fieldTypeException) {
-            static::assertSame(Collection::class, $fieldTypeException->getType());
-            static::assertSame(Floor::class, $fieldTypeException->getObjectClass());
-        }
+        $floor->expects(static::never())->method('setSeats');
+
+        $this->assigner->assignData($floor, $data);
     }
 
     public function testWriteComplexType(): void

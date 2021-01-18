@@ -174,7 +174,7 @@ class ApiControllerTest extends TestCase
 
         $countAfter = (int) $this->connection->fetchOne('SELECT count(*) FROM asset');
 
-        static::assertSame(Response::HTTP_NO_CONTENT, $client->getResponse()->getStatusCode());
+        static::assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
         static::assertSame($countBefore + 1, $countAfter);
 
         $result = $this->connection->fetchAssociative('SELECT * FROM asset order by id desc limit 1');
@@ -219,7 +219,11 @@ class ApiControllerTest extends TestCase
             server: ['HTTP_auth-token' => $this->getUserToken($this->adminUser)]
         );
 
-        static::assertSame(Response::HTTP_NO_CONTENT, $client->getResponse()->getStatusCode());
+        static::assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
+        $response = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        static::assertSame('New Name', $response['name']);
+        static::assertSame('Type', $response['type']);
 
         $data = $this->connection->fetchAssociative('SELECT * FROM asset where id = :id', ['id' => $asset->getId()]);
 
@@ -239,7 +243,7 @@ class ApiControllerTest extends TestCase
             server: ['HTTP_auth-token' => $this->getUserToken($this->adminUser)]
         );
 
-        static::assertSame(Response::HTTP_NO_CONTENT, $client->getResponse()->getStatusCode());
+        static::assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
 
         $data = $this->connection->fetchAssociative('SELECT * FROM asset where id = :id', ['id' => $asset->getId()]);
 
@@ -259,7 +263,7 @@ class ApiControllerTest extends TestCase
             content: json_encode(['city' => null], JSON_THROW_ON_ERROR),
         );
 
-        static::assertSame(Response::HTTP_NO_CONTENT, $client->getResponse()->getStatusCode());
+        static::assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
 
         $data = $this->connection->fetchAssociative('SELECT * FROM building where id = :id', ['id' => $building->getId()]);
 
