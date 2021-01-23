@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Controller;
 
@@ -18,10 +19,11 @@ class SamlAuthController extends AbstractController
     {
         $_SERVER['REQUEST_URI'] = $request->getRequestUri();
         $_SERVER['PATH_INFO'] = '/default-sp';
-        require (__DIR__ . '/../../vendor/simplesamlphp/simplesamlphp/modules/saml/www/sp/saml2-acs.php');
+        require __DIR__ . '/../../vendor/simplesamlphp/simplesamlphp/modules/saml/www/sp/saml2-acs.php';
 
         $authSource = new Simple('default-sp');
         $authSource->requireAuth();
+
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

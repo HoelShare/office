@@ -8,13 +8,13 @@ security:
   firewalls:
     callback:
       pattern: ^/api/saml/callback$
-      stateless: false
+      stateless: true
       context: my_context
       security: false
 
     login:
       pattern: ^/api/login
-      stateless: false
+      stateless: true
       context: my_context
       custom_authenticators:
         - App\Security\LdapAuthenticator

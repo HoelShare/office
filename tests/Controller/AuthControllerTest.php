@@ -135,7 +135,7 @@ class AuthControllerTest extends TestCase
     {
         $connection = $this->getContainer()->get(Connection::class);
         $connection->executeQuery('INSERT INTO user(external_id, roles) values (:id, :roles)',
-            ['id' => uniqid('', true), 'roles' => '["ROLE_USER"]',]);
+            ['id' => uniqid('', true), 'roles' => '["ROLE_USER"]']);
         $userId = (int) $connection->lastInsertId();
         $token = uniqid('', true);
         $connection->executeQuery('INSERT INTO auth_token (user_id, token) values (:id, :token)',
@@ -147,7 +147,7 @@ class AuthControllerTest extends TestCase
             server: ['HTTP_auth-token' => $token],
         );
 
-        $loggedOut = (int)$connection->fetchOne('SELECT count(*) from auth_token where token = :token',
+        $loggedOut = (int) $connection->fetchOne('SELECT count(*) from auth_token where token = :token',
             ['token' => $token]);
         static::assertSame(0, $loggedOut);
     }

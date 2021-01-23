@@ -7,5 +7,5 @@ $config = [
         'idp' => 'http://localhost:18080/simplesaml/saml2/idp/metadata.php',
         'privatekey' => 'test-saml.pem',
         'certificate' => 'test-saml.crt',
-    ]
+    ],
 ];

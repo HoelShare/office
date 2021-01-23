@@ -1,10 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
-use App\Controller\AuthController;
 use App\Tests\Common\IntegrationTestBehaviour;
 use App\Tests\Common\WebTestBehaviour;
+use DateInterval;
+use DateTime;
 use PHPUnit\Framework\TestCase;
 
 class SamlAuthControllerTest extends TestCase
@@ -14,7 +16,7 @@ class SamlAuthControllerTest extends TestCase
 
     public function testSamlCallback(): void
     {
-        $this->markTestIncomplete('TODO: Calculate Digest Value of XML');
+        static::markTestIncomplete('TODO: Calculate Digest Value of XML');
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_SERVER['SERVER_PORT'] = '8090';
         $_POST['SAMLResponse'] = $this->buildResponse();
@@ -33,7 +35,7 @@ class SamlAuthControllerTest extends TestCase
     private function buildResponse(): string
     {
         $dateFormat = 'Y-m-d\TH:i:s\Z';
-        $date = new \DateTime();
+        $date = new DateTime();
         $toSign = <<<'XML'
 <samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" Destination="http://localhost:8090/api/saml/callback" ID="_5050620ad817f0ea58e4be2bee2a4593ec9f705e46" InResponseTo="
 _c6f86504e2eec3915ee0799473d832f7fbb578e061" IssueInstant="2021-01-23T15:36:05Z" Version="2.0">
@@ -162,7 +164,7 @@ XML;
   </saml:Assertion>
 </samlp:Response>
 XML;
-        $notOnOrAfter = $date->add(new \DateInterval('P5M'))->format($dateFormat);
+        $notOnOrAfter = $date->add(new DateInterval('P5M'))->format($dateFormat);
         $notBefore = $date->format($dateFormat);
         $xmlToSign = sprintf($toSign, $notBefore, $notOnOrAfter, $notOnOrAfter);
         $xmlToSign = str_replace('\r\n', '\n', $xmlToSign);
@@ -194,7 +196,8 @@ XML;
         $xml = sprintf($response, $signature, $notOnOrAfter, $notBefore, $notOnOrAfter);
 
         dump($xmlToSign);
-        dd(base64_decode(base64_encode($xmlToSign)));
+        dd(base64_decode(base64_encode($xmlToSign), true));
+
         return base64_encode($xml);
     }
 }

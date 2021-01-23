@@ -5,7 +5,6 @@ namespace App\Tests\User;
 
 use App\User\UserMapper;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
 
 class UserMapperTest extends TestCase
 {
@@ -21,7 +20,7 @@ class UserMapperTest extends TestCase
                 'full_name' => 'full_name',
                 'roles' => 'roles',
                 'image' => 'image',
-            ]
+            ],
         ]);
     }
 

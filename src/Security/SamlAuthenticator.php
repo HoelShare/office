@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Security;
 
@@ -7,7 +8,6 @@ use App\Saml\SamlService;
 use App\User\UserHydrator;
 use App\User\UserService;
 use SimpleSAML\Auth\Simple;
-use SimpleSAML\Module;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

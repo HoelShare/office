@@ -3,9 +3,6 @@ declare(strict_types=1);
 
 namespace App\User;
 
-use App\User\ImportUser;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-
 class UserMapper
 {
     private string $idPath;
