@@ -18,7 +18,6 @@ use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class LdapAuthenticator extends AbstractAuthenticator
 {
@@ -31,7 +30,7 @@ class LdapAuthenticator extends AbstractAuthenticator
 
     public function supports(Request $request): ?bool
     {
-        return true;
+        return false;
     }
 
     public function authenticate(Request $request): PassportInterface

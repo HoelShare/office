@@ -30,4 +30,13 @@
       ```
 1. Interact with App Docker Container `docker exec -w /app -it office_app /bin/bash`
 1. Install application with `composer install`
-1. Application runs at [localhost:8090](http://localhost:8090/) 
+1. Application runs at [localhost:8090](http://localhost:8090/)
+
+### Configure SAML
+- Metadata URL
+- Entity ID
+
+Server Site:
+- Trusted Sites (From / Callback)
+- Endpoint to AssertionConsumer (possible the same like trusted sites)
+- Which information will be send

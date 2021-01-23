@@ -21,6 +21,7 @@ services:
     image: webdevops/php-apache:8.0
     environment:
       WEB_DOCUMENT_ROOT: /app/public
+      SIMPLESAMLPHP_CONFIG_DIR: /app/config
     links:
       - mail:mail
       - database:mysql
@@ -32,3 +33,12 @@ services:
 
   ldap:
     image: rroemhild/test-openldap
+
+  saml:
+    image: kristophjunge/test-saml-idp
+    ports:
+      - "18080:8080"
+      - "18443:8443"
+    environment:
+      SIMPLESAMLPHP_SP_ENTITY_ID: http://localhost:18080/simplesaml/saml2/idp/metadata.php
+      SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE: http://localhost:8090/api/saml/callback
