@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * @ORM\Entity()
  */
-class LdapToken implements JsonSerializable
+class AuthToken implements JsonSerializable
 {
     use EntitySerializableTrait;
 
@@ -34,7 +34,7 @@ class LdapToken implements JsonSerializable
     private ?DateTimeImmutable $expire;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="ldapTokens")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="authTokens")
      * @ORM\JoinColumn(nullable=false)
      * @Assert\NotBlank
      */

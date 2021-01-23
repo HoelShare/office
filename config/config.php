@@ -62,7 +62,7 @@ $config = [
      * root directory.
      */
     'certdir' => __DIR__ . '/../cert/',
-    'loggingdir' => 'log/',
+    'loggingdir' => __DIR__ . '/../var/log/',
     'datadir' => 'data/',
     'tempdir' => '/tmp/simplesaml',
 

@@ -39,7 +39,7 @@ class TokenAuthenticator extends AbstractAuthenticator
         $user = $this->entityManager->createQuery(
             'SELECT u
             FROM App\Entity\User u
-            INNER JOIN u.ldapTokens t
+            INNER JOIN u.authTokens t
             WHERE t.token = :apiToken'
         )->setParameter('apiToken', $apiToken)
             ->getOneOrNullResult();

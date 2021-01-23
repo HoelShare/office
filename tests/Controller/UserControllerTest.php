@@ -24,7 +24,7 @@ class UserControllerTest extends TestCase
         $client = $this->getClient();
         $client->request('GET',
             '/api/user/me',
-            server: ['HTTP_auth-token' => $this->user->getLdapTokens()->first()->getToken()]
+            server: ['HTTP_auth-token' => $this->user->getAuthTokens()->first()->getToken()]
         );
 
         $jsonResponse = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);

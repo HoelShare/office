@@ -7,7 +7,7 @@ use App\Entity\Asset;
 use App\Entity\Booking;
 use App\Entity\Building;
 use App\Entity\Floor;
-use App\Entity\LdapToken;
+use App\Entity\AuthToken;
 use App\Entity\Seat;
 use App\Entity\SeatAsset;
 use App\Entity\User;
@@ -136,11 +136,11 @@ trait DemodataTrait
 
         $user->setName($name);
         $user->setRoles($roles);
-        $user->setLdapId($ldapId);
+        $user->setExternalId($ldapId);
 
-        $ldapToken = new LdapToken();
+        $ldapToken = new AuthToken();
         $ldapToken->setToken(uniqid('', true));
-        $user->addLdapToken($ldapToken);
+        $user->addAuthToken($ldapToken);
 
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->persist($ldapToken);
@@ -294,14 +294,14 @@ trait DemodataTrait
         return $seatAsset;
     }
 
-    protected function addLdapToken(User $user): LdapToken
+    protected function addAuthToken(User $user): AuthToken
     {
-        $ldapToken = new LdapToken();
-        $ldapToken->setToken(uniqid('', true));
-        $ldapToken->setUser($user);
+        $authToken = new AuthToken();
+        $authToken->setToken(uniqid('', true));
+        $authToken->setUser($user);
 
-        $this->getEntityManager()->persist($ldapToken);
+        $this->getEntityManager()->persist($authToken);
 
-        return $ldapToken;
+        return $authToken;
     }
 }

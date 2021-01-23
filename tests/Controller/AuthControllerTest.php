@@ -134,11 +134,11 @@ class AuthControllerTest extends TestCase
     public function testLogoutRemovesToken(): void
     {
         $connection = $this->getContainer()->get(Connection::class);
-        $connection->executeQuery('INSERT INTO user(ldap_id, roles) values (:id, :roles)',
+        $connection->executeQuery('INSERT INTO user(external_id, roles) values (:id, :roles)',
             ['id' => uniqid('', true), 'roles' => '["ROLE_USER"]',]);
         $userId = (int) $connection->lastInsertId();
         $token = uniqid('', true);
-        $connection->executeQuery('INSERT INTO ldap_token (user_id, token) values (:id, :token)',
+        $connection->executeQuery('INSERT INTO auth_token (user_id, token) values (:id, :token)',
             ['id' => $userId, 'token' => $token]);
 
         $client = $this->getClient();
@@ -147,7 +147,7 @@ class AuthControllerTest extends TestCase
             server: ['HTTP_auth-token' => $token],
         );
 
-        $loggedOut = (int)$connection->fetchOne('SELECT count(*) from ldap_token where token = :token',
+        $loggedOut = (int)$connection->fetchOne('SELECT count(*) from auth_token where token = :token',
             ['token' => $token]);
         static::assertSame(0, $loggedOut);
     }

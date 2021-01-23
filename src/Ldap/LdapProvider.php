@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace App\Ldap;
 
+use App\User\ImportUser;
+use App\User\UserMapper;
+
 class LdapProvider
 {
     /**
@@ -73,7 +76,7 @@ class LdapProvider
         );
     }
 
-    public function getUserData(string $username): LdapUser
+    public function getUserData(string $username): ImportUser
     {
         $userFilter = $this->replaceUsername($username, $this->searchFilter);
 

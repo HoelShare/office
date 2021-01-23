@@ -19,11 +19,11 @@ class AuthController extends AbstractController
     }
 
     /**
-     * @Route(path="/api/login", name="login", methods={"POST"})
+     * @Route(path="/api/login", name="login", methods={"POST", "GET"})
      */
     public function loginAction(): void
     {
-        // handled by LdapAuthenticator
+        // handled by Authenticator
     }
 
     /**

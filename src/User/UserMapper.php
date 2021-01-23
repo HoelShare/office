@@ -1,9 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Ldap;
+namespace App\User;
 
-use RuntimeException;
+use App\User\ImportUser;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class UserMapper
 {
@@ -19,8 +20,9 @@ class UserMapper
 
     private string $imagePath;
 
-    public function __construct(array $userMapping)
+    public function __construct(string $authService, array $userMappings)
     {
+        $userMapping = $userMappings[$authService];
         $this->idPath = $userMapping['id'];
         $this->emailPath = $userMapping['email'];
         $this->displayNamePath = $userMapping['display_name'];
@@ -29,15 +31,15 @@ class UserMapper
         $this->imagePath = $userMapping['image'];
     }
 
-    public function mapUserInfo(array $rawLdapData): LdapUser
+    public function mapUserInfo(array $rawData): ImportUser
     {
-        $user = new LdapUser();
-        $user->id = $this->getField($rawLdapData, $this->idPath);
-        $user->email = $this->getField($rawLdapData, $this->emailPath);
-        $user->displayName = $this->getField($rawLdapData, $this->displayNamePath);
-        $user->fullName = $this->getField($rawLdapData, $this->fullNamePath);
-        $user->image = $this->getField($rawLdapData, $this->imagePath);
-        $user->roles = $this->getField($rawLdapData, $this->rolesPath, true);
+        $user = new ImportUser();
+        $user->id = $this->getField($rawData, $this->idPath);
+        $user->email = $this->getField($rawData, $this->emailPath);
+        $user->displayName = $this->getField($rawData, $this->displayNamePath) ?? $user->email;
+        $user->fullName = $this->getField($rawData, $this->fullNamePath) ?? $user->displayName;
+        $user->image = $this->getField($rawData, $this->imagePath);
+        $user->roles = $this->getField($rawData, $this->rolesPath, true);
 
         return $user;
     }

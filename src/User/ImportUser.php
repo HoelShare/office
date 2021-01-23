@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Ldap;
+namespace App\User;
 
-class LdapUser
+class ImportUser
 {
     public ?string $id;
 

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Security;
 
-use App\Common\HydrateEvent;
 use App\Entity\User;
 use App\Ldap\LdapService;
 use App\User\UserHydrator;
@@ -25,12 +24,13 @@ class LdapAuthenticator extends AbstractAuthenticator
         private LdapService $ldapService,
         private UserService $userService,
         private UserHydrator $userHydrator,
+        private string $authService,
     ) {
     }
 
     public function supports(Request $request): ?bool
     {
-        return false;
+        return $this->authService === 'ldap';
     }
 
     public function authenticate(Request $request): PassportInterface
@@ -49,7 +49,7 @@ class LdapAuthenticator extends AbstractAuthenticator
         }
 
         $this->userService->addToken($user);
-        $userBadge = new UserBadge($user->getLdapId(), fn () => $user);
+        $userBadge = new UserBadge($user->getExternalId(), fn () => $user);
 
         return new SelfValidatingPassport($userBadge);
     }
@@ -58,8 +58,8 @@ class LdapAuthenticator extends AbstractAuthenticator
     {
         $authToken = null;
         $user = $token->getUser();
-        if ($user instanceof User && $user->getLdapTokens()->last() !== null) {
-            $authToken = $user->getLdapTokens()->last()->getToken();
+        if ($user instanceof User && $user->getAuthTokens()->last() !== null) {
+            $authToken = $user->getAuthTokens()->last()->getToken();
         }
 
         $this->userHydrator->hydrateUser($user);

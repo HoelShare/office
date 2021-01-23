@@ -75,11 +75,11 @@ class EntityRepositoryTest extends TestCase
     {
         $this->authorizeUser($this->adminUser);
         $context = new RepositoryContext();
-        $token = $this->addLdapToken($this->adminUser);
+        $token = $this->addAuthToken($this->adminUser);
         $this->getEntityManager()->flush();
 
         $this->expectException(NotAllowedException::class);
-        $this->entityRepository->get('ldapToken', (string) $token->getId(), $context);
+        $this->entityRepository->get('authToken', (string) $token->getId(), $context);
     }
 
     public function testGetNotExistingEntityClass(): void
@@ -124,10 +124,10 @@ class EntityRepositoryTest extends TestCase
     public function testReadNotAllowed(): void
     {
         $context = new RepositoryContext(user: $this->user);
-        $this->addLdapToken($this->user);
+        $this->addAuthToken($this->user);
         $this->getEntityManager()->flush();
         $this->expectException(NotAllowedException::class);
-        $this->entityRepository->read('ldapToken', $context);
+        $this->entityRepository->read('authToken', $context);
     }
 
     public function testReadOtherEntity(): void

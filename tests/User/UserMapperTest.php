@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Ldap;
+namespace App\Tests\User;
 
-use App\Ldap\UserMapper;
+use App\User\UserMapper;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -13,13 +13,15 @@ class UserMapperTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->mapper = new UserMapper([
-            'id' => 'id',
-            'email' => 'email',
-            'display_name' => 'display_name',
-            'full_name' => 'full_name',
-            'roles' => 'roles',
-            'image' => 'image',
+        $this->mapper = new UserMapper('ldap', [
+            'ldap' => [
+                'id' => 'id',
+                'email' => 'email',
+                'display_name' => 'display_name',
+                'full_name' => 'full_name',
+                'roles' => 'roles',
+                'image' => 'image',
+            ]
         ]);
     }
 

@@ -306,6 +306,6 @@ class ApiControllerTest extends TestCase
             $user = $this->user;
         }
 
-        return $user->getLdapTokens()->first()->getToken();
+        return $user->getAuthTokens()->first()->getToken();
     }
 }

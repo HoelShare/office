@@ -4,8 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 imports:
-    - { resource: 'ldap.yml' }
-    - { resource: 'ldap_local.yml', ignore_errors: true }
+    - { resource: 'user_mapping.yml' }
+    - { resource: 'user_mapping.yml', ignore_errors: true }
 
 parameters:
     floor_path: '/maps'
@@ -48,9 +48,10 @@ services:
             $bindDn: '%env(LDAP_BIND_DN)%'
             $baseDn: '%env(LDAP_BASE_DN)%'
 
-    App\Ldap\UserMapper:
+    App\User\UserMapper:
         arguments:
-            $userMapping: '%ldap.user_mapping%'
+            $authService: '%external.auth_service%'
+            $userMappings: '%user_mappings%'
 
     App\Request\ErrorResponseFactory:
         arguments:
@@ -60,3 +61,11 @@ services:
         arguments:
             $mapDirectory: '%floor_path%'
             $publicFolder: '%kernel.project_dir%/public'
+
+    App\Security\LdapAuthenticator:
+        arguments:
+            $authService: '%external.auth_service%'
+
+    App\Security\SamlAuthenticator:
+        arguments:
+            $authService: '%external.auth_service%'
