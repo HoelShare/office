@@ -9,6 +9,8 @@ imports:
 
 parameters:
     floor_path: '/maps'
+    saml.metadata_fallback: ''
+    saml.metadata_url: '%env(default:saml.metadata_fallback:SAML_METADATA_URL)%'
 
 services:
     # default configuration for services in *this* file
@@ -69,3 +71,8 @@ services:
     App\Security\SamlAuthenticator:
         arguments:
             $authService: '%external.auth_service%'
+
+    App\Command\ImportMetaDataCommand:
+        arguments:
+            $metaDataUrl: '%saml.metadata_url%'
+            $metaDataFileName: '%kernel.project_dir%/metadata/saml20-idp-remote.php'

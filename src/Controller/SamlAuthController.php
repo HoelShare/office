@@ -21,9 +21,6 @@ class SamlAuthController extends AbstractController
         $_SERVER['PATH_INFO'] = '/default-sp';
         require __DIR__ . '/../../vendor/simplesamlphp/simplesamlphp/modules/saml/www/sp/saml2-acs.php';
 
-        $authSource = new Simple('default-sp');
-        $authSource->requireAuth();
-
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

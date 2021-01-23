@@ -27,6 +27,7 @@ services:
       - mail:mail
       - database:mysql
       - ldap:ldap
+      - saml:saml
     volumes:
     - .:/app
     ports:
