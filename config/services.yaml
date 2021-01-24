@@ -11,6 +11,8 @@ parameters:
     floor_path: '/maps'
     saml.metadata_fallback: ''
     saml.metadata_url: '%env(default:saml.metadata_fallback:SAML_METADATA_URL)%'
+    frontend.url_fallback: 'http://localhost:9999'
+    frontend.url: '%env(default:frontend.url_fallback:FRONTEND_URL)%'
 
 services:
     # default configuration for services in *this* file
@@ -71,6 +73,7 @@ services:
     App\Security\SamlAuthenticator:
         arguments:
             $authService: '%external.auth_service%'
+            $frontendUrl: '%frontend.url%'
 
     App\Command\ImportMetaDataCommand:
         arguments:

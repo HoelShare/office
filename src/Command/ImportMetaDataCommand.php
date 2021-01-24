@@ -1,7 +1,7 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Command;
-
 
 use SimpleSAML\Metadata\SAMLParser;
 use Symfony\Component\Console\Command\Command;
@@ -36,5 +36,4 @@ FILE;
 
         return 0;
     }
-
 }

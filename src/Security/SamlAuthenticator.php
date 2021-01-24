@@ -26,6 +26,7 @@ class SamlAuthenticator extends AbstractAuthenticator
         private UserService $userService,
         private UserHydrator $userHydrator,
         private string $authService,
+        private string $frontendUrl,
     ) {
     }
 
@@ -37,7 +38,7 @@ class SamlAuthenticator extends AbstractAuthenticator
     public function authenticate(Request $request): PassportInterface
     {
         $authSource = new Simple('default-sp');
-        $authSource->requireAuth();
+        $authSource->requireAuth(['ReturnTo' => $this->frontendUrl]);
 
         $user = $this->samlService->updateUser($authSource);
 
