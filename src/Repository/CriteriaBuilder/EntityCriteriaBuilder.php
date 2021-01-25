@@ -33,6 +33,7 @@ class EntityCriteriaBuilder implements CriteriaBuilder
     {
         $value = $queryBuilder->expr()->literal($data['value']);
         $type = $data['type'];
+
         return match ($type) {
             FilterTypes::EQUALS,
             FilterTypes::NOT_EQUALS,

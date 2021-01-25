@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Tests\User;
 
-use App\Ldap\LdapUser;
 use App\Tests\Common\DemodataTrait;
 use App\Tests\Common\IntegrationTestBehaviour;
+use App\User\ImportUser;
 use App\User\UserService;
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
@@ -28,17 +28,17 @@ class UserServiceTest extends TestCase
 
     public function testAddsTokenToUser(): void
     {
-        static::assertCount(1, $this->user->getLdapTokens());
+        static::assertCount(1, $this->user->getAuthTokens());
         $this->userService->addToken($this->user);
 
-        static::assertCount(2, $this->user->getLdapTokens());
+        static::assertCount(2, $this->user->getAuthTokens());
     }
 
     public function testAddsTokenToDatabase(): void
     {
-        $countBefore = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM ldap_token');
+        $countBefore = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM auth_token');
         $this->userService->addToken($this->user);
-        $countAfter = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM ldap_token');
+        $countAfter = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM auth_token');
 
         static::assertSame($countBefore + 1, $countAfter);
     }
@@ -46,8 +46,8 @@ class UserServiceTest extends TestCase
     public function testAddedTokenBelongsToUser(): void
     {
         $this->userService->addToken($this->user);
-        $token = $this->user->getLdapTokens()->first();
-        $userId = (int) $this->connection->fetchOne('SELECT user_id FROM ldap_token where id = :id', ['id' => $token->getId()]);
+        $token = $this->user->getAuthTokens()->first();
+        $userId = (int) $this->connection->fetchOne('SELECT user_id FROM auth_token where id = :id', ['id' => $token->getId()]);
 
         static::assertSame($this->user->getId(), $userId);
         static::assertSame($this->user->getId(), $token->getUser()->getId());
@@ -55,61 +55,61 @@ class UserServiceTest extends TestCase
 
     public function testUpdateWritesUser(): void
     {
-        $ldapUser = new LdapUser();
-        $ldapUser->id = uniqid('', true);
-        $ldapUser->roles = [];
-        $ldapUser->email = 'test@example.com';
-        $ldapUser->displayName = 'Test';
-        $ldapUser->fullName = 'Full Name';
+        $importUser = new ImportUser();
+        $importUser->id = uniqid('', true);
+        $importUser->roles = [];
+        $importUser->email = 'test@example.com';
+        $importUser->displayName = 'Test';
+        $importUser->fullName = 'Full Name';
 
-        $user = $this->userService->updateUser($ldapUser);
+        $user = $this->userService->updateUser($importUser);
 
-        static::assertSame($ldapUser->id, $user->getLdapId());
+        static::assertSame($importUser->id, $user->getExternalId());
         static::assertSame(['ROLE_USER'], $user->getRoles());
-        static::assertSame($ldapUser->email, $user->getEmail());
-        static::assertSame($ldapUser->displayName, $user->getName());
-        static::assertSame($ldapUser->fullName, $user->getFullName());
+        static::assertSame($importUser->email, $user->getEmail());
+        static::assertSame($importUser->displayName, $user->getName());
+        static::assertSame($importUser->fullName, $user->getFullName());
     }
 
     public function testUpdateCreatesNotExisting(): void
     {
-        $ldapUser = new LdapUser();
-        $ldapUser->id = uniqid('', true);
-        $ldapUser->roles = [];
-        $ldapUser->email = 'test@example.com';
-        $ldapUser->displayName = 'Test';
-        $ldapUser->fullName = 'Full Name';
+        $importUser = new ImportUser();
+        $importUser->id = uniqid('', true);
+        $importUser->roles = [];
+        $importUser->email = 'test@example.com';
+        $importUser->displayName = 'Test';
+        $importUser->fullName = 'Full Name';
 
-        $this->userService->updateUser($ldapUser);
+        $this->userService->updateUser($importUser);
 
-        $user = $this->connection->fetchAssociative('SELECT * from user where ldap_id = :ldap', ['ldap' => $ldapUser->id]);
+        $user = $this->connection->fetchAssociative('SELECT * from user where external_id = :externalId', ['externalId' => $importUser->id]);
 
         static::assertNotFalse($user, 'User was not created');
-        static::assertSame($ldapUser->id, $user['ldap_id']);
-        static::assertSame($ldapUser->fullName, $user['full_name']);
-        static::assertSame($ldapUser->displayName, $user['name']);
-        static::assertSame($ldapUser->email, $user['email']);
-        static::assertSame($ldapUser->roles, json_decode($user['roles'], true, 512, JSON_THROW_ON_ERROR));
+        static::assertSame($importUser->id, $user['external_id']);
+        static::assertSame($importUser->fullName, $user['full_name']);
+        static::assertSame($importUser->displayName, $user['name']);
+        static::assertSame($importUser->email, $user['email']);
+        static::assertSame($importUser->roles, json_decode($user['roles'], true, 512, JSON_THROW_ON_ERROR));
     }
 
     public function testUpdateSyncExistingUser(): void
     {
-        $ldapUser = new LdapUser();
-        $ldapUser->id = $this->user->getLdapId();
-        $ldapUser->roles = [];
-        $ldapUser->email = 'test@example.com';
-        $ldapUser->displayName = 'Test';
-        $ldapUser->fullName = 'Full Name';
+        $importUser = new ImportUser();
+        $importUser->id = $this->user->getExternalId();
+        $importUser->roles = [];
+        $importUser->email = 'test@example.com';
+        $importUser->displayName = 'Test';
+        $importUser->fullName = 'Full Name';
 
-        $this->userService->updateUser($ldapUser);
+        $this->userService->updateUser($importUser);
 
-        $user = $this->connection->fetchAssociative('SELECT * from user where ldap_id = :ldap', ['ldap' => $ldapUser->id]);
+        $user = $this->connection->fetchAssociative('SELECT * from user where external_id = :externalId', ['externalId' => $importUser->id]);
 
         static::assertNotFalse($user, 'User was not created');
-        static::assertSame($ldapUser->id, $user['ldap_id']);
-        static::assertSame($ldapUser->fullName, $user['full_name']);
-        static::assertSame($ldapUser->displayName, $user['name']);
-        static::assertSame($ldapUser->email, $user['email']);
-        static::assertSame($ldapUser->roles, json_decode($user['roles'], true, 512, JSON_THROW_ON_ERROR));
+        static::assertSame($importUser->id, $user['external_id']);
+        static::assertSame($importUser->fullName, $user['full_name']);
+        static::assertSame($importUser->displayName, $user['name']);
+        static::assertSame($importUser->email, $user['email']);
+        static::assertSame($importUser->roles, json_decode($user['roles'], true, 512, JSON_THROW_ON_ERROR));
     }
 }

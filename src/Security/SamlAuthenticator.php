@@ -3,58 +3,71 @@ declare(strict_types=1);
 
 namespace App\Security;
 
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\User;
+use App\Saml\SamlService;
+use App\User\UserHydrator;
+use App\User\UserService;
+use SimpleSAML\Auth\Simple;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 
-class TokenAuthenticator extends AbstractAuthenticator
+class SamlAuthenticator extends AbstractAuthenticator
 {
-    public function __construct(private EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        private SamlService $samlService,
+        private UserService $userService,
+        private UserHydrator $userHydrator,
+        private string $authService,
+    ) {
     }
 
     public function supports(Request $request): ?bool
     {
-        return $request->headers->has('auth-token');
+        return $this->authService === 'saml';
     }
 
     public function authenticate(Request $request): PassportInterface
     {
-        $apiToken = $request->headers->get('auth-token');
-        if ($apiToken === null) {
-            // The token header was empty, authentication fails with HTTP Status
-            // Code 401 "Unauthorized"
-            throw new CustomUserMessageAuthenticationException('No API token provided');
-        }
+        $returnUrl = $request->get('return_url');
+        $authSource = new Simple('default-sp');
+        $authSource->requireAuth(['ReturnTo' => $returnUrl]);
 
-        $user = $this->entityManager->createQuery(
-            'SELECT u
-            FROM App\Entity\User u
-            INNER JOIN u.authTokens t
-            WHERE t.token = :apiToken'
-        )->setParameter('apiToken', $apiToken)
-            ->getOneOrNullResult();
+        $user = $this->samlService->updateUser($authSource);
 
-        if ($user === null) {
+        if (null === $user) {
             throw new UsernameNotFoundException();
         }
-        $badge = new UserBadge($apiToken, fn () => $user);
 
-        return new SelfValidatingPassport($badge);
+        $this->userService->addToken($user);
+        $userBadge = new UserBadge($user->getExternalId(), fn () => $user);
+
+        return new SelfValidatingPassport($userBadge);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        return null;
+        $authToken = null;
+        $user = $token->getUser();
+        if ($user instanceof User && $user->getAuthTokens()->last() !== null) {
+            $authToken = $user->getAuthTokens()->last()->getToken();
+        }
+
+        $this->userHydrator->hydrateUser($user);
+
+        $data = [
+            'authToken' => $authToken,
+            'user' => $user,
+        ];
+
+        return new JsonResponse($data);
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response

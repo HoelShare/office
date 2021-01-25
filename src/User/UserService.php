@@ -3,9 +3,8 @@ declare(strict_types=1);
 
 namespace App\User;
 
-use App\Entity\LdapToken;
+use App\Entity\AuthToken;
 use App\Entity\User;
-use App\Ldap\LdapUser;
 use Doctrine\ORM\EntityManagerInterface;
 
 class UserService
@@ -18,36 +17,36 @@ class UserService
 
     public function addToken(User $user): void
     {
-        $token = new LdapToken();
+        $token = new AuthToken();
         $token->setUser($user);
         $token->setToken($this->tokenService->generateToken($user));
 
         $this->entityManager->persist($token);
         $this->entityManager->flush();
 
-        $user->addLdapToken($token);
+        $user->addAuthToken($token);
     }
 
     public function removeToken(User $user, string $token): void
     {
-        foreach ($user->getLdapTokens() as $ldapToken) {
-            if ($ldapToken->getToken() === $token) {
-                $user->removeLdapToken($ldapToken);
-                $this->entityManager->remove($ldapToken);
+        foreach ($user->getAuthTokens() as $authToken) {
+            if ($authToken->getToken() === $token) {
+                $user->removeAuthToken($authToken);
+                $this->entityManager->remove($authToken);
             }
         }
 
         $this->entityManager->flush();
     }
 
-    public function updateUser(LdapUser $ldapUser): User
+    public function updateUser(ImportUser $importUser): User
     {
-        $user = $this->getUserById($ldapUser->id);
-        $user->setEmail($ldapUser->email);
-        $user->setFullName($ldapUser->fullName);
-        $user->setImage($ldapUser->image);
-        $user->setName($ldapUser->displayName);
-        $user->setRoles($ldapUser->roles);
+        $user = $this->getUserById($importUser->id);
+        $user->setEmail($importUser->email);
+        $user->setFullName($importUser->fullName);
+        $user->setImage($importUser->image);
+        $user->setName($importUser->displayName);
+        $user->setRoles($importUser->roles);
 
         $this->syncUser($user);
 
@@ -60,18 +59,19 @@ class UserService
         $this->entityManager->flush();
     }
 
-    private function getUserById(string $ldapId): User
+    private function getUserById(string $externalId): User
     {
+        /** @var User|null $user */
         $user = $this->entityManager
             ->getRepository(User::class)
-            ->findOneBy(['ldapId' => $ldapId]);
+            ->findOneBy(['externalId' => $externalId]);
 
         if ($user) {
             return $user;
         }
 
         $user = new User();
-        $user->setLdapId($ldapId);
+        $user->setExternalId($externalId);
 
         return $user;
     }

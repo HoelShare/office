@@ -1,8 +1,0 @@
-parameters:
-  ldap.user_mapping:
-    id: "cn"
-    email: "mail"
-    display_name: "displayname"
-    full_name: "cn"
-    roles: "ou"
-    image: "jpegphoto"

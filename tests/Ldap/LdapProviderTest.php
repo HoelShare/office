@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Ldap;
 
 use App\Ldap\LdapProvider;
-use App\Ldap\UserMapper;
+use App\User\UserMapper;
 use PHPUnit\Framework\TestCase;
 
 class LdapProviderTest extends TestCase

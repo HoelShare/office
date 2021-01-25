@@ -6,12 +6,19 @@ security:
     '%env(LDAP_ADMIN_GROUP)%': ROLE_ADMIN
 
   firewalls:
+    callback:
+      pattern: ^/api/saml/callback$
+      stateless: true
+      context: my_context
+      security: false
+
     login:
       pattern: ^/api/login
       stateless: true
       context: my_context
       custom_authenticators:
         - App\Security\LdapAuthenticator
+        - App\Security\SamlAuthenticator
 
     main:
       pattern: ^/api

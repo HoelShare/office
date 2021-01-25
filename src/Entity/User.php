@@ -26,7 +26,7 @@ class User implements UserInterface, JsonSerializable
     /**
      * @ORM\Column(unique=true)
      */
-    private string $ldapId;
+    private string $externalId;
 
     /**
      * @ORM\Column(nullable=true)
@@ -54,9 +54,9 @@ class User implements UserInterface, JsonSerializable
     private ?string $image;
 
     /**
-     * @ORM\OneToMany(targetEntity=LdapToken::class, mappedBy="user", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=AuthToken::class, mappedBy="user", orphanRemoval=true)
      */
-    private Collection $ldapTokens;
+    private Collection $authTokens;
 
     /**
      * @ORM\OneToMany(targetEntity=Booking::class, mappedBy="user", orphanRemoval=true)
@@ -67,7 +67,7 @@ class User implements UserInterface, JsonSerializable
 
     public function __construct()
     {
-        $this->ldapTokens = new ArrayCollection();
+        $this->authTokens = new ArrayCollection();
         $this->bookings = new ArrayCollection();
     }
 
@@ -95,14 +95,14 @@ class User implements UserInterface, JsonSerializable
         $this->id = $id;
     }
 
-    public function getLdapId(): string
+    public function getExternalId(): string
     {
-        return $this->ldapId;
+        return $this->externalId;
     }
 
-    public function setLdapId(string $ldapId): void
+    public function setExternalId(string $externalId): void
     {
-        $this->ldapId = $ldapId;
+        $this->externalId = $externalId;
     }
 
     public function getEmail(): ?string
@@ -154,29 +154,29 @@ class User implements UserInterface, JsonSerializable
     }
 
     /**
-     * @return Collection|LdapToken[]
+     * @return Collection|AuthToken[]
      */
-    public function getLdapTokens(): Collection
+    public function getAuthTokens(): Collection
     {
-        return $this->ldapTokens;
+        return $this->authTokens;
     }
 
-    public function addLdapToken(LdapToken $ldapToken): self
+    public function addAuthToken(AuthToken $authToken): self
     {
-        if (!$this->ldapTokens->contains($ldapToken)) {
-            $this->ldapTokens[] = $ldapToken;
-            $ldapToken->setUser($this);
+        if (!$this->authTokens->contains($authToken)) {
+            $this->authTokens[] = $authToken;
+            $authToken->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeLdapToken(LdapToken $ldapToken): self
+    public function removeAuthToken(AuthToken $authToken): self
     {
-        if ($this->ldapTokens->removeElement($ldapToken)) {
+        if ($this->authTokens->removeElement($authToken)) {
             // set the owning side to null (unless already changed)
-            if ($ldapToken->getUser() === $this) {
-                $ldapToken->setUser(null);
+            if ($authToken->getUser() === $this) {
+                $authToken->setUser(null);
             }
         }
 

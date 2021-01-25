@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Security;
 
-use App\Common\HydrateEvent;
 use App\Entity\User;
 use App\Ldap\LdapService;
 use App\User\UserHydrator;
@@ -18,7 +17,6 @@ use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class LdapAuthenticator extends AbstractAuthenticator
 {
@@ -26,12 +24,13 @@ class LdapAuthenticator extends AbstractAuthenticator
         private LdapService $ldapService,
         private UserService $userService,
         private UserHydrator $userHydrator,
+        private string $authService,
     ) {
     }
 
     public function supports(Request $request): ?bool
     {
-        return true;
+        return $this->authService === 'ldap';
     }
 
     public function authenticate(Request $request): PassportInterface
@@ -50,7 +49,7 @@ class LdapAuthenticator extends AbstractAuthenticator
         }
 
         $this->userService->addToken($user);
-        $userBadge = new UserBadge($user->getLdapId(), fn () => $user);
+        $userBadge = new UserBadge($user->getExternalId(), fn () => $user);
 
         return new SelfValidatingPassport($userBadge);
     }
@@ -59,8 +58,8 @@ class LdapAuthenticator extends AbstractAuthenticator
     {
         $authToken = null;
         $user = $token->getUser();
-        if ($user instanceof User && $user->getLdapTokens()->last() !== null) {
-            $authToken = $user->getLdapTokens()->last()->getToken();
+        if ($user instanceof User && $user->getAuthTokens()->last() !== null) {
+            $authToken = $user->getAuthTokens()->last()->getToken();
         }
 
         $this->userHydrator->hydrateUser($user);

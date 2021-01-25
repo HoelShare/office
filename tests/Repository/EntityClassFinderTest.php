@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace App\Tests\Repository;
 
 use App\Entity\Asset;
+use App\Entity\AuthToken;
 use App\Entity\Booking;
 use App\Entity\Building;
 use App\Entity\Floor;
-use App\Entity\LdapToken;
 use App\Entity\Seat;
 use App\Entity\SeatAsset;
 use App\Entity\User;
@@ -32,7 +32,7 @@ class EntityClassFinderTest extends TestCase
         yield ['booking', Booking::class];
         yield ['building', Building::class];
         yield ['floor', Floor::class];
-        yield ['ldapToken', LdapToken::class];
+        yield ['authToken', AuthToken::class];
         yield ['asset', Asset::class];
         yield ['seat', Seat::class];
         yield ['seatasset', SeatAsset::class];

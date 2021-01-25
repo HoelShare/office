@@ -59,7 +59,7 @@ class FloorMapControllerTest extends TestCase
         $client = $this->getClient();
         $client->request(Request::METHOD_POST,
             sprintf('/api/floor/%s/upload', $this->floor->getId()),
-            server: ['HTTP_auth-token' => $this->user->getLdapTokens()->first()->getToken()],
+            server: ['HTTP_auth-token' => $this->user->getAuthTokens()->first()->getToken()],
         );
 
         static::assertSame(Response::HTTP_FORBIDDEN, $client->getResponse()->getStatusCode());
@@ -70,7 +70,7 @@ class FloorMapControllerTest extends TestCase
         $client = $this->getClient();
         $client->request(Request::METHOD_POST,
             sprintf('/api/floor/%s/upload', $this->floor->getId()),
-            server: ['HTTP_auth-token' => $this->adminUser->getLdapTokens()->first()->getToken()],
+            server: ['HTTP_auth-token' => $this->adminUser->getAuthTokens()->first()->getToken()],
         );
 
         static::assertSame(Response::HTTP_BAD_REQUEST, $client->getResponse()->getStatusCode());
@@ -82,7 +82,7 @@ class FloorMapControllerTest extends TestCase
         $client->request(Request::METHOD_POST,
             sprintf('/api/floor/%s/upload', 1000000),
             files: ['foo' => $this->getFile()],
-            server: ['HTTP_auth-token' => $this->adminUser->getLdapTokens()->first()->getToken()],
+            server: ['HTTP_auth-token' => $this->adminUser->getAuthTokens()->first()->getToken()],
         );
 
         static::assertSame(Response::HTTP_NOT_FOUND, $client->getResponse()->getStatusCode());
@@ -94,7 +94,7 @@ class FloorMapControllerTest extends TestCase
         $client->request(Request::METHOD_POST,
             sprintf('/api/floor/%s/upload', $this->floor->getId()),
             files: ['foo' => $this->getFile()],
-            server: ['HTTP_auth-token' => $this->adminUser->getLdapTokens()->first()->getToken()],
+            server: ['HTTP_auth-token' => $this->adminUser->getAuthTokens()->first()->getToken()],
         );
 
         static::assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
