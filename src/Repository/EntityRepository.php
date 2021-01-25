@@ -113,6 +113,11 @@ class EntityRepository
             throw new NotAllowedException('Not Allowed');
         }
 
+        $validations = $this->validator->validate($object);
+        if ($validations->count()) {
+            throw new ValidationException($validations);
+        }
+
         $this->eventDispatcher->dispatch(new UpdateEvent($object::class, $object, $data));
 
         $this->entityManager->persist($object);
