@@ -125,6 +125,8 @@ class EntityAssigner
                 }
 
                 return $value;
+            case 'bool':
+                return boolval($value);
             default:
                 throw new NotSupportedFieldTypeException(
                     $parameterClass,
