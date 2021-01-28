@@ -3,12 +3,10 @@ declare(strict_types=1);
 
 namespace App\Repository\Event;
 
-use App\Entity\Booking;
 use App\Entity\User;
 use App\Entity\Webhook;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Security;
 
 class WebhookWriteListener implements EventSubscriberInterface

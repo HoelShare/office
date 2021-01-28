@@ -1,9 +1,9 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Messenger;
 
 use App\Entity\User;
-use JetBrains\PhpStorm\Pure;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class CreateMessage implements WebhookMessageInterface
@@ -11,7 +11,7 @@ class CreateMessage implements WebhookMessageInterface
     public function __construct(
         private string $entity,
         private object $data,
-        private UserInterface $user,
+        private ?UserInterface $user,
     ) {
     }
 
@@ -25,7 +25,7 @@ class CreateMessage implements WebhookMessageInterface
         return $this->data;
     }
 
-    public function getUser(): UserInterface
+    public function getUser(): ?UserInterface
     {
         return $this->user;
     }

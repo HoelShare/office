@@ -3,9 +3,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Messenger\CreateMessage;
-use App\Messenger\DeleteMessage;
-use App\Messenger\UpdateMessage;
 use App\Repository\EntityRepository;
 use App\Request\ContextFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -60,12 +57,12 @@ class ApiController extends AbstractController
      */
     public function createAction(
         Request $request,
-        MessageBusInterface $bus,
         string $entity
     ): JsonResponse {
-        $object = $this->entityRepository->write($entity, $request->request->all());
+        $context = $this->contextFactory->create($request, $this->getUser());
 
-        $bus->dispatch(new CreateMessage($entity, $object, $this->getUser()));
+        $object = $this->entityRepository->write($context, $entity, $request->request->all());
+
         return new JsonResponse($object);
     }
 
@@ -74,7 +71,6 @@ class ApiController extends AbstractController
      */
     public function updateAction(
         Request $request,
-        MessageBusInterface $bus,
         string $entity,
         string $id,
     ): JsonResponse {
@@ -82,7 +78,6 @@ class ApiController extends AbstractController
         $data = $request->request->all();
         $object = $this->entityRepository->update($context, $entity, $id, $data);
 
-        $bus->dispatch(new UpdateMessage($entity, $object, $this->getUser(), $data));
         return new JsonResponse($object);
     }
 
@@ -99,7 +94,6 @@ class ApiController extends AbstractController
 
         $this->entityRepository->delete($context, $entity, $id);
 
-        $bus->dispatch(new DeleteMessage($entity, $id, $this->getUser()));
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

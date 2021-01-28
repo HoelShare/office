@@ -8,4 +8,5 @@ trait IntegrationTestBehaviour
     use KernelTestBehaviour;
     use DatabaseTransactionBehaviour;
     use AuthorizationTrait;
+    use MessengerTrait;
 }

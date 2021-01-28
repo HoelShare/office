@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use RuntimeException;
+use function boolval;
 
 class EntityAssigner
 {

@@ -1,8 +1,8 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Messenger;
 
-use App\Entity\User;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class UpdateMessage extends CreateMessage
@@ -10,7 +10,7 @@ class UpdateMessage extends CreateMessage
     public function __construct(
         string $entity,
         object $data,
-        UserInterface $user,
+        ?UserInterface $user,
         private array $updatedData,
     ) {
         parent::__construct($entity, $data, $user);

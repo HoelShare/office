@@ -1,9 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Messenger;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\PDO\Statement;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -12,11 +13,11 @@ class WebhookHandler implements MessageHandlerInterface
 {
     public function __construct(
         private HttpClientInterface $client,
-        private EntityManagerInterface $entityManager,
+        private Connection $connection,
     ) {
     }
 
-    public function __invoke(WebhookMessageInterface $message)
+    public function __invoke(WebhookMessageInterface $message): void
     {
         $urls = $this->getWebhookUrls($message->getUserId());
 
@@ -27,7 +28,7 @@ class WebhookHandler implements MessageHandlerInterface
 
     private function getWebhookUrls(?int $userId): array
     {
-        $query = $this->entityManager->getConnection()->createQueryBuilder();
+        $query = $this->connection->createQueryBuilder();
         $query->select('webhook_url')
             ->from('webhook', 'w')
             ->where('w.active = 1 and w.user_id is null');

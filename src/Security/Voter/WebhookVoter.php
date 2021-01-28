@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Security\Voter;
 
-use App\Entity\Booking;
 use App\Entity\User;
 use App\Entity\Webhook;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;

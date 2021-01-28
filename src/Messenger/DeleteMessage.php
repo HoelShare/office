@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace App\Messenger;
 
@@ -10,7 +11,7 @@ class DeleteMessage implements WebhookMessageInterface
     public function __construct(
         private string $entity,
         private string $id,
-        private UserInterface $user,
+        private ?UserInterface $user,
     ) {
     }
 
@@ -34,17 +35,17 @@ class DeleteMessage implements WebhookMessageInterface
         return $this->id;
     }
 
-    public function getUser(): UserInterface
+    public function getUser(): ?UserInterface
     {
         return $this->user;
     }
 
-    public function getUserId(): ?int {
+    public function getUserId(): ?int
+    {
         if (!($this->user instanceof User)) {
             return null;
         }
 
         return $this->user->getId();
     }
-
 }
