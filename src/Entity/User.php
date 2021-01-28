@@ -63,12 +63,18 @@ class User implements UserInterface, JsonSerializable
      */
     private Collection $bookings;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Webhook::class, mappedBy="user", orphanRemoval=true)
+     */
+    private Collection $webhooks;
+
     private bool $isAdmin;
 
     public function __construct()
     {
         $this->authTokens = new ArrayCollection();
         $this->bookings = new ArrayCollection();
+        $this->webhooks = new ArrayCollection();
     }
 
     public function getSalt()
@@ -239,5 +245,15 @@ class User implements UserInterface, JsonSerializable
     public function setIsAdmin(bool $isAdmin): void
     {
         $this->isAdmin = $isAdmin;
+    }
+
+    public function getWebhooks(): Collection
+    {
+        return $this->webhooks;
+    }
+
+    public function setWebhooks(Collection $webhooks): void
+    {
+        $this->webhooks = $webhooks;
     }
 }

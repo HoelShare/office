@@ -30,6 +30,7 @@ services:
       - saml:saml
     volumes:
     - .:/app
+    - "./_dev_ops/supervisor/message-worker.conf:/opt/docker/etc/supervisor.d/message-worker.conf"
     ports:
     - 127.0.0.1:8090:80
 

@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -54,9 +55,13 @@ class ApiController extends AbstractController
     /**
      * @Route(path="", name="create", methods={"POST"})
      */
-    public function createAction(Request $request, string $entity): JsonResponse
-    {
-        $object = $this->entityRepository->write($entity, $request->request->all());
+    public function createAction(
+        Request $request,
+        string $entity
+    ): JsonResponse {
+        $context = $this->contextFactory->create($request, $this->getUser());
+
+        $object = $this->entityRepository->write($context, $entity, $request->request->all());
 
         return new JsonResponse($object);
     }
@@ -64,11 +69,14 @@ class ApiController extends AbstractController
     /**
      * @Route(path="/{id}", name="update", methods={"PATCH"}, requirements={"id"="\d+"})
      */
-    public function updateAction(Request $request, string $entity, string $id): JsonResponse
-    {
+    public function updateAction(
+        Request $request,
+        string $entity,
+        string $id,
+    ): JsonResponse {
         $context = $this->contextFactory->create($request, $this->getUser());
-
-        $object = $this->entityRepository->update($context, $entity, $id, $request->request->all());
+        $data = $request->request->all();
+        $object = $this->entityRepository->update($context, $entity, $id, $data);
 
         return new JsonResponse($object);
     }
@@ -76,8 +84,12 @@ class ApiController extends AbstractController
     /**
      * @Route(path="/{id}", name="delete", methods={"DELETE"}, requirements={"id"="\d+"})
      */
-    public function deleteAction(Request $request, string $entity, string $id): JsonResponse
-    {
+    public function deleteAction(
+        Request $request,
+        MessageBusInterface $bus,
+        string $entity,
+        string $id
+    ): JsonResponse {
         $context = $this->contextFactory->create($request, $this->getUser());
 
         $this->entityRepository->delete($context, $entity, $id);

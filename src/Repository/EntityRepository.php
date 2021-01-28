@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Messenger\CreateMessage;
+use App\Messenger\DeleteMessage;
+use App\Messenger\UpdateMessage;
 use App\Repository\CriteriaBuilder\CriteriaBuilder;
 use App\Repository\Event\UpdateEvent;
 use App\Repository\Event\WriteEvent;
@@ -14,6 +17,7 @@ use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -28,12 +32,14 @@ class EntityRepository
         private EntityClassFinder $classFinder,
         private EntityAssigner $entityAssigner,
         private EventDispatcherInterface $eventDispatcher,
+        private MessageBusInterface $bus,
     ) {
     }
 
-    public function get(string $entity,
-                        string $id,
-                        RepositoryContext $context
+    public function get(
+        string $entity,
+        string $id,
+        RepositoryContext $context
     ): ?object {
         $class = $this->classFinder->findClass($entity);
         $queryBuilder = $this->buildQuery($class, $context);
@@ -54,8 +60,10 @@ class EntityRepository
         return $result;
     }
 
-    public function read(string $entity, RepositoryContext $context): array
-    {
+    public function read(
+        string $entity,
+        RepositoryContext $context
+    ): array {
         $class = $this->classFinder->findClass($entity);
         $queryBuilder = $this->buildQuery($class, $context);
 
@@ -71,8 +79,11 @@ class EntityRepository
         return $results;
     }
 
-    public function write(string $entity, array $data): object
-    {
+    public function write(
+        RepositoryContext $context,
+        string $entity,
+        array $data,
+    ): object {
         $class = $this->classFinder->findClass($entity);
         $object = new $class();
 
@@ -94,11 +105,17 @@ class EntityRepository
         $this->entityManager->persist($object);
         $this->entityManager->flush();
 
+        $this->bus->dispatch(new CreateMessage($entity, $object, $context->getUser()));
+
         return $object;
     }
 
-    public function update(RepositoryContext $context, string $entity, string $id, array $data): object
-    {
+    public function update(
+        RepositoryContext $context,
+        string $entity,
+        string $id,
+        array $data,
+    ): object {
         $object = $this->get($entity, $id, $context);
 
         if (!$object) {
@@ -123,6 +140,8 @@ class EntityRepository
         $this->entityManager->persist($object);
         $this->entityManager->flush();
 
+        $this->bus->dispatch(new UpdateMessage($entity, $object, $context->getUser(), $data));
+
         return $object;
     }
 
@@ -135,13 +154,15 @@ class EntityRepository
         }
 
         if (!$this->authorizationChecker
-                ->isGranted(VoterAttributes::VOTE_DELETE, $object)) {
+            ->isGranted(VoterAttributes::VOTE_DELETE, $object)) {
             throw new NotAllowedException();
         }
 
         try {
             $this->entityManager->remove($object);
             $this->entityManager->flush();
+
+            $this->bus->dispatch(new DeleteMessage($entity, $id, $context->getUser()));
         } catch (ForeignKeyConstraintViolationException $e) {
             throw new NotAllowedException();
         }

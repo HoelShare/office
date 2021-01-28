@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use RuntimeException;
+use function boolval;
 
 class EntityAssigner
 {
@@ -125,6 +126,8 @@ class EntityAssigner
                 }
 
                 return $value;
+            case 'bool':
+                return boolval($value);
             default:
                 throw new NotSupportedFieldTypeException(
                     $parameterClass,

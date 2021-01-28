@@ -19,6 +19,7 @@ use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Messenger\Transport\InMemoryTransport;
 use function count;
 
 class EntityRepositoryTest extends TestCase
@@ -173,7 +174,7 @@ class EntityRepositoryTest extends TestCase
         $data = ['name' => 'Foo', 'type' => 'bar'];
 
         $this->assertEvent(WriteEvent::class,
-            fn () => $this->entityRepository->write('asset', $data),
+            fn () => $this->entityRepository->write(new RepositoryContext(), 'asset', $data),
             function ($event) use ($data): void {
                 static::assertInstanceOf(WriteEvent::class, $event);
                 static::assertSame(Asset::class, $event->getClass());
@@ -188,7 +189,7 @@ class EntityRepositoryTest extends TestCase
         $data = ['name' => 'Foo', 'type' => 'bar'];
 
         $this->expectException(NotAllowedException::class);
-        $this->entityRepository->write('asset', $data);
+        $this->entityRepository->write(new RepositoryContext(), 'asset', $data);
     }
 
     public function testWriteNotAllowedByVoters(): void
@@ -197,7 +198,7 @@ class EntityRepositoryTest extends TestCase
         $data = ['userId' => $this->adminUser->getId()];
 
         $this->expectException(NotAllowedException::class);
-        $this->entityRepository->write('booking', $data);
+        $this->entityRepository->write(new RepositoryContext(), 'booking', $data);
     }
 
     public function testWriteChecksValidations(): void
@@ -206,7 +207,7 @@ class EntityRepositoryTest extends TestCase
         $data = ['type' => 'foo'];
 
         try {
-            $this->entityRepository->write('asset', $data);
+            $this->entityRepository->write(new RepositoryContext(), 'asset', $data);
             static::fail('Exception was not thrown');
         } catch (ValidationException $exception) {
             static::assertSame(['name' => [
@@ -221,7 +222,7 @@ class EntityRepositoryTest extends TestCase
         $countBefore = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM asset');
 
         $data = ['name' => 'Foo', 'type' => 'bar'];
-        $this->entityRepository->write('asset', $data);
+        $this->entityRepository->write(new RepositoryContext(), 'asset', $data);
 
         $countAfter = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM asset');
         static::assertSame($countBefore + 1, $countAfter);
@@ -231,14 +232,14 @@ class EntityRepositoryTest extends TestCase
     {
         $this->authorizeUser($this->adminUser);
         $data = ['name' => 'Foo', 'type' => 'bar'];
-        $this->entityRepository->write('asset', $data);
+        $this->entityRepository->write(new RepositoryContext(), 'asset', $data);
 
         $result = $this->connection->fetchAssociative('SELECT * FROM asset order by ID desc');
         static::assertEquals('bar', $result['type']);
         static::assertEquals('Foo', $result['name']);
 
         $data = ['name' => 'name', 'type' => 'type'];
-        $this->entityRepository->write('asset', $data);
+        $this->entityRepository->write(new RepositoryContext(), 'asset', $data);
 
         $result = $this->connection->fetchAssociative('SELECT * FROM asset order by ID desc');
         static::assertEquals('type', $result['type']);
@@ -319,6 +320,23 @@ class EntityRepositoryTest extends TestCase
         static::assertSame($newName, $updated['name']);
     }
 
+    public function testUpdateChecksValidations(): void
+    {
+        $this->authorizeUser($this->adminUser);
+        $id = $this->connection->fetchOne('SELECT id FROM asset');
+
+        $data = ['name' => ''];
+
+        try {
+            $this->entityRepository->update(new RepositoryContext(), 'asset', $id, $data);
+            static::fail('Exception was not thrown');
+        } catch (ValidationException $exception) {
+            static::assertSame(['name' => [
+                'This value should not be blank.',
+            ]], $exception->getErrors());
+        }
+    }
+
     public function testDeleteNotAllowed(): void
     {
         $this->authorizeUser($this->user);
@@ -347,5 +365,111 @@ class EntityRepositoryTest extends TestCase
 
         $result = $this->connection->fetchOne('SELECT id FROM asset where id = :id', ['id' => $id]);
         static::assertFalse($result);
+    }
+
+    public function testCreateDispatchesMessage(): void
+    {
+        $this->authorizeUser($this->adminUser);
+        $data = ['name' => 'Foo', 'type' => 'bar'];
+        $this->entityRepository->write(new RepositoryContext(), 'asset', $data);
+        $this->entityRepository->write(new RepositoryContext(), 'asset', $data);
+        $this->entityRepository->write(new RepositoryContext(), 'asset', $data);
+
+        /** @var InMemoryTransport $transport */
+        $transport = $this->getContainer()->get('messenger.transport.async');
+        static::assertCount(3, $transport->get());
+    }
+
+    public function testUpdateDispatchesMessage(): void
+    {
+        $this->authorizeUser($this->adminUser);
+        $id = $this->connection->fetchOne('SELECT id FROM asset');
+        $newName = uniqid('', true);
+        $newType = uniqid('', true);
+        $data = ['name' => $newName, 'type' => $newType];
+
+        $this->entityRepository->update(new RepositoryContext(), 'asset', $id, $data);
+        $this->entityRepository->update(new RepositoryContext(), 'asset', $id, $data);
+        $this->entityRepository->update(new RepositoryContext(), 'asset', $id, $data);
+
+        /** @var InMemoryTransport $transport */
+        $transport = $this->getContainer()->get('messenger.transport.async');
+        static::assertCount(3, $transport->get());
+    }
+
+    public function testDeleteDispatchesMessage(): void
+    {
+        $this->authorizeUser($this->adminUser);
+        $asset = $this->addAsset('asset', 'type');
+        $this->getEntityManager()->flush();
+        $id = $asset->getId();
+
+        $this->entityRepository->delete(new RepositoryContext(), 'asset', (string) $id);
+
+        /** @var InMemoryTransport $transport */
+        $transport = $this->getContainer()->get('messenger.transport.async');
+        static::assertCount(1, $transport->get());
+    }
+
+    public function testWriteWebhookAsUser(): void
+    {
+        $this->authorizeUser($this->user);
+
+        $data = ['webhookUrl' => 'url', 'active' => false];
+        $webhook = $this->entityRepository->write(new RepositoryContext(), 'webhook', $data);
+        $result = $this->connection->fetchAssociative('SELECT * FROM webhook where id = :id', ['id' => $webhook->getId()]);
+        static::assertEquals('url', $result['webhook_url']);
+        static::assertEquals($this->user->getId(), $result['user_id']);
+        static::assertEquals(0, $result['active']);
+    }
+
+    public function testUserCannotWriteForOthers(): void
+    {
+        $this->authorizeUser($this->user);
+
+        $data = ['webhookUrl' => 'url', 'userId' => $this->adminUser->getId()];
+        $this->expectException(NotAllowedException::class);
+        $this->entityRepository->write(new RepositoryContext(), 'webhook', $data);
+    }
+
+    public function testGetWebhookAsUser(): void
+    {
+        $this->authorizeUser($this->user);
+        $this->connection->insert('webhook', ['webhook_url' => 'localhost']);
+
+        $webhook = $this->entityRepository->get('webhook', $this->connection->lastInsertId(), new RepositoryContext(user: $this->user));
+
+        static::assertNull($webhook);
+    }
+
+    public function testGetWebhookWithoutUserThrowsException(): void
+    {
+        $this->connection->insert('webhook', ['webhook_url' => 'localhost']);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('No user set');
+
+        $this->entityRepository->get('webhook', $this->connection->lastInsertId(), new RepositoryContext());
+    }
+
+    public function testWriteWebhookAsAdminIsSystemWebhook(): void
+    {
+        $this->authorizeUser($this->adminUser);
+
+        $data = ['webhookUrl' => 'url'];
+        $webhook = $this->entityRepository->write(new RepositoryContext(), 'webhook', $data);
+        $result = $this->connection->fetchAssociative('SELECT * FROM webhook where id = :id', ['id' => $webhook->getId()]);
+        static::assertNull($result['user_id']);
+    }
+
+    public function testAdminCanWriteWebhookForOthers(): void
+    {
+        $this->authorizeUser($this->adminUser);
+
+        $data = ['webhookUrl' => 'url', 'userId' => $this->user->getId()];
+        $webhook = $this->entityRepository->write(new RepositoryContext(), 'webhook', $data);
+        $result = $this->connection->fetchAssociative('SELECT * FROM webhook where id = :id', ['id' => $webhook->getId()]);
+        static::assertEquals('url', $result['webhook_url']);
+        static::assertEquals($this->user->getId(), $result['user_id']);
+        static::assertEquals(1, $result['active']);
     }
 }

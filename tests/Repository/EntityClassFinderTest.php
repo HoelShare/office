@@ -11,6 +11,7 @@ use App\Entity\Floor;
 use App\Entity\Seat;
 use App\Entity\SeatAsset;
 use App\Entity\User;
+use App\Entity\Webhook;
 use App\Repository\EntityClassFinder;
 use App\Tests\Common\KernelTestBehaviour;
 use PHPUnit\Framework\TestCase;
@@ -37,6 +38,7 @@ class EntityClassFinderTest extends TestCase
         yield ['seat', Seat::class];
         yield ['seatasset', SeatAsset::class];
         yield ['user', User::class];
+        yield ['webhook', Webhook::class];
     }
 
     /**
