@@ -118,6 +118,8 @@ class EntityAssigner
                 return (string) $value;
             case 'int':
                 return (int) $value;
+            case 'float':
+                return (float) $value;
             case DateTimeImmutable::class:
                 $originalValue = $value;
                 $value = DateTimeImmutable::createFromFormat(DATE_ATOM, $value);

@@ -46,7 +46,6 @@ class Seat implements JsonSerializable
     /**
      * @ORM\Column(type="integer", nullable=false)
      * @Assert\Type(type="integer")
-     * @Assert\NotBlank
      */
     private int $floorId;
 
