@@ -28,15 +28,27 @@ class SeatAsset implements JsonSerializable
     private int $priority;
 
     /**
+     * @ORM\Column(type="integer", nullable=false)
+     * @Assert\Type(type="integer")
+     */
+    private int $seatId;
+
+    /**
+     * @ORM\Column(type="integer", nullable=false)
+     * @Assert\Type(type="integer")
+     */
+    private int $assetId;
+
+    /**
      * @ORM\ManyToOne(targetEntity=Seat::class, inversedBy="seatAssets")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, fieldName="seatId", onDelete="cascade")
      * @Assert\NotBlank
      */
     private ?Seat $seat;
 
     /**
      * @ORM\ManyToOne(targetEntity=Asset::class, inversedBy="seatAssets")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, fieldName="assetId")
      * @Assert\NotBlank
      */
     private ?Asset $asset;
@@ -79,5 +91,25 @@ class SeatAsset implements JsonSerializable
     public function setAsset(Asset $asset): void
     {
         $this->asset = $asset;
+    }
+
+    public function getAssetId(): int
+    {
+        return $this->assetId;
+    }
+
+    public function setAssetId(int $assetId): void
+    {
+        $this->assetId = $assetId;
+    }
+
+    public function getSeatId(): int
+    {
+        return $this->seatId;
+    }
+
+    public function setSeatId(int $seatId): void
+    {
+        $this->seatId = $seatId;
     }
 }
