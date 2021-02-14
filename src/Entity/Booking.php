@@ -26,16 +26,17 @@ class Booking implements JsonSerializable
     /**
      * @ORM\Column(type="integer")
      */
-    private int $userId;
+    private int $userId = 0;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private int $seatId;
+    private int $seatId = 0;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="bookings")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotBlank
      */
     private ?User $user;
 
