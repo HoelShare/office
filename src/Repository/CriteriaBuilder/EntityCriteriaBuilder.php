@@ -24,6 +24,11 @@ class EntityCriteriaBuilder implements CriteriaBuilder
         foreach ($context->getWhere() as $key => $value) {
             if (!str_contains($key, '.')) {
                 $key = sprintf('%s.%s', CriteriaBuilder::SELECT_ALIAS, $key);
+            } else if (!str_starts_with(CriteriaBuilder::SELECT_ALIAS . '.', $key)) {
+              $join = explode('.', $key)[0];
+              if (!in_array($join, $queryBuilder->getAllAliases(), true)) {
+                $queryBuilder->innerJoin(CriteriaBuilder::SELECT_ALIAS . '.' . $join, $join);
+              }
             }
             yield $this->map($key, $value, $queryBuilder);
         }

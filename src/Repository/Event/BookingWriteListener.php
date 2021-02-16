@@ -82,6 +82,10 @@ class BookingWriteListener implements EventSubscriberInterface
                     $query->expr()->gt('b.untilDay', ':from'),
                     $query->expr()->lt('b.untilDay', ':until'),
                 ),
+                $query->expr()->andX(
+                  $query->expr()->eq('b.fromDay', ':from'),
+                  $query->expr()->eq('b.untilDay', ':until'),
+                ),
             ))
             ->setParameter('seat', $booking->getSeat())
             ->setParameter('from', $booking->getFromDay())

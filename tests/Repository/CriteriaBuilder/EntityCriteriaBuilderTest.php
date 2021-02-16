@@ -102,7 +102,10 @@ class EntityCriteriaBuilderTest extends TestCase
         }
     }
 
-    public function testSingleConditionNotEquals(): void
+    /**
+     * @dataProvider provideFilterTypes
+     */
+    public function testSingleConditionFilterType(string $filterType): void
     {
         $criteriaBuilder = new EntityCriteriaBuilder();
         $queryBuilder = $this->createMock(QueryBuilder::class);
@@ -115,7 +118,7 @@ class EntityCriteriaBuilderTest extends TestCase
 
         $expr2 = $this->createMock(Expr::class);
         $expr2->expects(static::once())
-            ->method('neq')
+            ->method($filterType)
             ->with(CriteriaBuilder::SELECT_ALIAS . '.name', 'literal')
             ->willReturn($comparison);
 
@@ -123,10 +126,20 @@ class EntityCriteriaBuilderTest extends TestCase
             ->method('expr')
             ->willReturnOnConsecutiveCalls($expr, $expr2);
 
-        $context = $this->buildContext(['name' => ['type' => FilterTypes::NOT_EQUALS, 'value' => 'foo']]);
+        $context = $this->buildContext(['name' => ['type' => $filterType, 'value' => 'foo']]);
         foreach ($criteriaBuilder->build($context, $queryBuilder) as $result) {
             static::assertSame($comparison, $result);
         }
+    }
+
+    public function provideFilterTypes(): iterable
+    {
+        yield [FilterTypes::EQUALS];
+        yield [FilterTypes::NOT_EQUALS];
+        yield [FilterTypes::GREATER_THAN];
+        yield [FilterTypes::GREATER_THAN_EQUALS];
+        yield [FilterTypes::LESS_THAN];
+        yield [FilterTypes::LESS_THAN_EQUALS];
     }
 
     public function testSingleConditionNotSupported(): void
@@ -150,5 +163,37 @@ class EntityCriteriaBuilderTest extends TestCase
         $context = new RepositoryContext(where: $where);
         $this->expectException(BadRequestHttpException::class);
         iterator_to_array($criteriaBuilder->build($context, $queryBuilder));
+    }
+
+    public function testFilterJoin(): void
+    {
+        $criteriaBuilder = new EntityCriteriaBuilder();
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $comparison = $this->createMock(Comparison::class);
+        $expr = $this->createMock(Expr::class);
+        $expr->expects(static::once())
+            ->method('literal')
+            ->with('foo')
+            ->willReturn('literal');
+
+        $expr2 = $this->createMock(Expr::class);
+        $expr2->expects(static::once())
+            ->method('eq')
+            ->with('entity.name', 'literal')
+            ->willReturn($comparison);
+
+        $queryBuilder->expects(static::exactly(2))
+            ->method('expr')
+            ->willReturnOnConsecutiveCalls($expr, $expr2);
+
+        $queryBuilder->method('getAllAliases')->willReturn([]);
+
+        $queryBuilder->expects(static::once())->method('innerJoin')
+            ->with(EntityCriteriaBuilder::SELECT_ALIAS . '.entity', 'entity');
+
+        $context = $this->buildContext(['entity.name' => 'foo']);
+        foreach ($criteriaBuilder->build($context, $queryBuilder) as $result) {
+            static::assertSame($comparison, $result);
+        }
     }
 }
