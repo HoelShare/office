@@ -18,7 +18,7 @@ services:
 
   app:
     container_name: office_app
-    image: webdevops/php-apache:8.0
+    image: webdevops/php-apache-dev:8.0
     environment:
       WEB_DOCUMENT_ROOT: /app/public
       SIMPLESAMLPHP_CONFIG_DIR: /app/config
